@@ -10,7 +10,7 @@ def mean_std_max_min(array):
     # Average
     mean = statistics.mean(array)
     # Standard deviation
-    st_dev = statistics.stdev(array[1:])
+    st_dev = statistics.stdev(array)
     # Maximum value
     max_value = max(array)
     # Minimum value (excluding initial 0 value)
