@@ -1,6 +1,8 @@
+from enum import Enum
 from random import randint
 import tkinter as tk
 import logger
+import argparse
 
 bg = 'light sky blue'
 canvas_width = 1100
@@ -8,7 +10,15 @@ canvas_height = 800
 x_coord = 300
 y_coord = 100
 
-img_folder = 'app/img/'
+img_folder = 'img/'
+data_directory = '../data/events/'
+user_type = None
+
+
+class UserType(Enum):
+    HUMAN = "Human"
+    SIMPLE_BOT = "Simple Bot"
+    ADV_BOT = "Advanced Bot"
 
 
 class MainApp(tk.Tk):
@@ -44,7 +54,7 @@ class MainApp(tk.Tk):
 class StartUpPage(tk.Canvas):
 
     def start(self):
-        logger.start_recording()
+        logger.start_recording(data_directory, user_type)
         self.master.switch_canvas(BallGame)
 
     def __init__(self, master, *args, **kwargs):
@@ -278,6 +288,20 @@ class SortingGame(tk.Frame):
 
 
 def main():
+    global user_type
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("userType", default="human")
+    args = parser.parse_args()
+    user_type = args.userType
+
+    # if args.userType == 'simple':
+    #     user_type = UserType.SIMPLE_BOT
+    # elif args.userType == 'advanced':
+    #     user_type = UserType.ADV_BOT
+    # elif args.userType == 'human':
+    #     user_type = UserType.HUMAN
+
     app = MainApp()
     app.mainloop()
 

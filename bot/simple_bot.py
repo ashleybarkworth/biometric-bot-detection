@@ -4,7 +4,7 @@ import pyautogui
 
 region = (600, 200, 2200, 1600)
 
-img_folder = 'bot/img/'
+img_folder = 'img/'
 
 
 def find_center(location):
@@ -47,7 +47,7 @@ def click_image(location):
     # Calculates and clicks the image centre
     if location is not None:
         x, y = find_center(location)
-        pyautogui.moveTo(x, y)
+        pyautogui.moveTo(x, y, duration=0.05)
         pyautogui.leftClick()
 
 
@@ -79,7 +79,7 @@ def play_sorting_game():
     for obj in objects:
         img = ''.join([obj, '.png'])
         x, y = find_center(find_image(img, False))
-        pyautogui.moveTo(x, y)
+        pyautogui.moveTo(x, y, duration=0.05)
 
         if obj in fruits:
             pyautogui.dragTo(fx, fy, button='left')
@@ -105,12 +105,13 @@ def click_start_button():
 
 
 def main():
+    pyautogui.MINIMUM_DURATION = 0
     time.sleep(1)
     # Type something into the input box
     location = find_image('input_box.png', False)
     click_image(location)
     type_word('hello world')
-    # Click start button to begin recording
+    # Click start_time button to begin recording
     click_start_button()
     # Play the ball clicking game
     play_ball_game()
