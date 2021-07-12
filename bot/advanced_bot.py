@@ -45,7 +45,6 @@ def click_image(location):
     :param location: (left, top, width, height) coordinate of the image on the screen
     :return: nothing
     """
-    # Calculates and clicks the image centre
     if location is not None:
         x, y = find_center(location)
         bezier_curve.moveTo(x, y)
@@ -91,9 +90,9 @@ def play_sorting_game():
 
         speed = random.uniform(0.3, 1.2)
         if obj in fruits:
-            pyautogui.dragTo(fx, fy, duration=speed, button='left', tween=pyautogui.easeOutElastic)
+            pyautogui.dragTo(fx, fy, duration=speed, button='left', tween=pyautogui.easeOutQuad)
         elif obj in animals:
-            pyautogui.dragTo(ax, ay, duration=speed, button='left', tween=pyautogui.easeOutElastic)
+            pyautogui.dragTo(ax, ay, duration=speed, button='left', tween=pyautogui.easeOutQuad)
 
 
 def play_ball_game():
@@ -102,10 +101,11 @@ def play_ball_game():
     :return: nothing
     """
     click_start_button()
-    timeout = time.time() + 10
-    while time.time() < timeout:
+    clicks = 0
+    while clicks < 10:
         ball_location = find_image('ball.png', True)
         click_image(ball_location)
+        clicks += 1
 
 
 def click_start_button():

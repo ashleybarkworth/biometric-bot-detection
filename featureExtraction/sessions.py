@@ -110,14 +110,14 @@ class Session:
             = ([] for _ in range(9))
 
         for action in actions:
-            durations.append(action.mean_v)
+            durations.append(action.duration)
             trajectories.append(action.trajectory)
             distances.append(action.distance)
             straightness.append(action.straightness)
             num_points.append(action.n)
-            velocities.append(action.mean_v)
-            accelerations.append(action.mean_a)
-            jerks.append(action.mean_j)
+            velocities.append(action.v)
+            accelerations.append(action.a)
+            jerks.append(action.j)
             angle_sums.append(action.sum_of_angles)
 
         [self.mm_mean_v, self.mm_sd_v, self.mm_max_v, self.mm_min_v] = mean_sd_max_min(velocities)
@@ -142,14 +142,14 @@ class Session:
             click_times, approach_times = ([] for _ in range(11))
 
         for action in actions:
-            durations.append(action.mean_v)
+            durations.append(action.duration)
             trajectories.append(action.trajectory)
             distances.append(action.distance)
             straightness.append(action.straightness)
             num_points.append(action.n)
-            velocities.append(action.mean_v)
-            accelerations.append(action.mean_a)
-            jerks.append(action.mean_j)
+            velocities.append(action.v)
+            accelerations.append(action.a)
+            jerks.append(action.j)
             angle_sums.append(action.sum_of_angles)
             # Last event is mouse release, second last event is mouse press
             n = len(action.events) - 1
@@ -183,14 +183,14 @@ class Session:
         durations, velocities, accelerations, trajectories, jerks, straightness, num_points, distances, angle_sums \
             = ([] for _ in range(9))
         for action in actions:
-            durations.append(action.mean_v)
+            durations.append(action.duration)
             trajectories.append(action.trajectory)
             distances.append(action.distance)
             straightness.append(action.straightness)
             num_points.append(action.n)
-            velocities.append(action.mean_v)
-            accelerations.append(action.mean_a)
-            jerks.append(action.mean_j)
+            velocities.append(action.v)
+            accelerations.append(action.a)
+            jerks.append(action.j)
             angle_sums.append(action.sum_of_angles)
 
         [self.dd_mean_v, self.dd_sd_v, self.dd_max_v, self.dd_min_v] = mean_sd_max_min(velocities)

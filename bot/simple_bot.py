@@ -1,3 +1,4 @@
+import math
 import time
 
 import pyautogui
@@ -5,6 +6,7 @@ import pyautogui
 region = (600, 200, 2200, 1600)
 
 img_folder = 'img/'
+speed = 300
 
 
 def find_center(location):
@@ -44,10 +46,12 @@ def click_image(location):
     :param location:  (left, top, width, height) coordinate of the image on the screen
     :return:nothing
     """
-    # Calculates and clicks the image centre
+    global speed
     if location is not None:
         x, y = find_center(location)
-        pyautogui.moveTo(x, y, duration=0.05)
+        x_now, y_now = pyautogui.position()
+        length = math.sqrt(pow(abs(x - x_now), 2) + pow(abs(y - y_now), 2))
+        pyautogui.moveTo(x, y, duration=float(length/speed))
         pyautogui.leftClick()
 
 
@@ -93,10 +97,11 @@ def play_ball_game():
     :return: nothing
     """
     click_start_button()
-    timeout = time.time() + 10
-    while time.time() < timeout:
+    clicks = 0
+    while clicks < 10:
         location = find_image('ball.png', True)
         click_image(location)
+        clicks += 1
 
 
 def click_start_button():

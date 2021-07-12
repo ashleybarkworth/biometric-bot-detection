@@ -83,11 +83,8 @@ def create_action_file(actions, subdirectory, filename):
 
 
 def write_action_csv_header(writer):
-    header = ["action_type", "duration", "direction", "trajectory", "distance", "straightness", "num_points",
-              "max_deviation", "sum_of_angles", "mean_curv", "sd_curv", "max_curv", "min_curv",
-              "mean_omega", "sd_omega", "max_omega", "min_omega", "mean_vx", "sd_vx", "max_vx", "min_vx",
-              "mean_vy", "sd_vy", "max_vy", "min_vy", "mean_v", "sd_v", "max_v", "min_v",
-              "mean_a", "sd_a", "max_a", "min_a", "mean_j", "sd_j", "max_j", "min_j"]
+    header = ['action_type', 'duration', 'direction', 'trajectory', 'distance', 'straightness', 'num_points',
+              'max_deviation', 'sum_of_angles', 'curv', 'omega', 'vx', 'vy', 'v', 'a', 'j']
     writer.writerow(header)
 
 

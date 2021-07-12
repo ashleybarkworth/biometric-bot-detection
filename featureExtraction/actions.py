@@ -1,7 +1,7 @@
 import math
+import statistics
 from enum import Enum
 from utility.direction import get_bearings
-from utility.stats import mean_sd_max_min
 
 CURV_THRESHOLD = 0.0005
 
@@ -38,13 +38,13 @@ class MouseAction:
 
         self.direction = None
         self.duration = self.trajectory = self.distance = self.straightness = self.n = self.sum_of_angles = self.max_deviation = 0
-        self.mean_vx = self.sd_vx = self.max_vx = self.min_vx = 0
-        self.mean_vy = self.sd_vy = self.max_vy = self.min_vy = 0
-        self.mean_v = self.sd_v = self.max_v = self.min_v = 0
-        self.mean_a = self.sd_a = self.max_a = self.min_a = 0
-        self.mean_j = self.sd_j = self.max_j = self.min_j = 0
-        self.mean_omega = self.sd_omega = self.max_omega = self.min_omega = 0
-        self.mean_curv = self.sd_curv = self.max_curv = self.min_curv = 0
+        self.vx = self.sd_vx = self.max_vx = self.min_vx = 0
+        self.vy = self.sd_vy = self.max_vy = self.min_vy = 0
+        self.v = self.sd_v = self.max_v = self.min_v = 0
+        self.a = self.sd_a = self.max_a = self.min_a = 0
+        self.j = self.sd_j = self.max_j = self.min_j = 0
+        self.omega = self.sd_omega = self.max_omega = self.min_omega = 0
+        self.curv = self.sd_curv = self.max_curv = self.min_curv = 0
 
     def __str__(self):
         return f'Mouse Action: {self.action_type}\nNumber of Events: {len(self.events)}'
@@ -53,7 +53,7 @@ class MouseAction:
         self.n = len(self.events)
         vx, vy, v, thetas, path = ([0] for _ in range(5))
         sum_of_angles = 0
-        trajectory = 0
+        self.trajectory = 0
 
         for i in range(1, self.n):
             curr_event = self.events[i]
@@ -66,8 +66,8 @@ class MouseAction:
             dy = curr_event.y - prev_event.y
 
             self.distance = math.sqrt((dx ** 2) + (dy ** 2))
-            trajectory += self.distance
-            path.append(trajectory)
+            self.trajectory += self.distance
+            path.append(self.trajectory)
 
             # Velocities
             vx_i = dx / dt
@@ -81,32 +81,28 @@ class MouseAction:
             # Angles
             theta_i = math.atan2(dy, dx)
             thetas.append(theta_i)
-            sum_of_angles += theta_i
+            self.sum_of_angles += theta_i
 
-        # Mean/St.Dev/Min/Max Velocities
-        [self.mean_vx, self.sd_vx, self.max_vx, self.min_vx] = mean_sd_max_min(vx)
-        [self.mean_vy, self.sd_vy, self.max_vy, self.min_vy] = mean_sd_max_min(vy)
-        [self.mean_v, self.sd_v, self.max_v, self.min_v] = mean_sd_max_min(v)
+        # Velocities (x, y, tangential)
+        self.vx = statistics.mean(vx)
+        self.vy = statistics.mean(vy)
+        self.v = statistics.mean(v)
 
-        # Acceleration & Beginning Acceleration Time
+        # Acceleration
         a = self.calculate_acceleration(self.n, v)
-        # Mean/St.Dev/Min/Max Acceleration
-        [self.mean_a, self.sd_a, self.max_a, self.min_a] = mean_sd_max_min(a)
+        self.a = statistics.mean(a)
 
         # Jerk
         j = self.calculate_jerk(a)
-        # Mean/St.Dev/Min/Max Jerk
-        [self.mean_j, self.sd_j, self.max_j, self.min_j] = mean_sd_max_min(j)
+        self.j = statistics.mean(j)
 
         # Angular Velocity
         omega = self.calculate_angular_velocity(thetas)
-        # Mean/St.Dev/Min/Max Angular Velocity
-        [self.mean_omega, self.sd_omega, self.max_omega, self.min_omega] = mean_sd_max_min(omega)
+        self.omega = statistics.mean(omega)
 
         # Curvature
         curvature = self.calculate_curvature(path, thetas)
-        # Mean/St.Dev/Min/Max Curvature
-        [self.mean_curv, self.sd_curv, self.max_curv, self.min_curv] = mean_sd_max_min(curvature)
+        self.curv = statistics.mean(curvature)
 
         first_pt = self.events[0]
         last_pt = self.events[-1]
@@ -129,20 +125,12 @@ class MouseAction:
         self.max_deviation = self.largest_deviation(self.n)
 
         # Direction (-pi,...,pi)
-        # theta = math.atan2((last_pt.y - first_pt.y), (last_pt.x - first_pt.x))
-        # direction = compute_direction(theta)
         self.direction = get_bearings(first_pt, last_pt)
 
         # Generate CSV row
         return map(str, [self.action_type, self.duration, self.direction, self.trajectory, self.distance,
-                         self.straightness, self.n, self.max_deviation, self.sum_of_angles,
-                         self.mean_curv, self.sd_curv, self.max_curv, self.min_curv,
-                         self.mean_omega, self.sd_omega, self.max_omega, self.min_omega,
-                         self.mean_vx, self.sd_vx, self.max_vx, self.min_vx,
-                         self.mean_vy, self.sd_vy, self.max_vy, self.min_vy,
-                         self.mean_v, self.sd_v, self.max_v, self.min_v,
-                         self.mean_a, self.sd_a, self.max_a, self.min_a,
-                         self.mean_j, self.sd_j, self.max_j, self.min_j])
+                         self.straightness, self.n, self.max_deviation, self.sum_of_angles, self.curv, self.omega,
+                         self.vx, self.vy, self.v, self.a, self.j])
 
     def calculate_acceleration(self, n, v):
         a = [0]
