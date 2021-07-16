@@ -51,21 +51,6 @@ def click_image(location):
         pyautogui.leftClick()
 
 
-def type_word(word):
-    """
-    Types word by performing a keyboard key press down, followed by a release, for each of the characters in it.
-    Adds a random delay between each letter for more "human"-like typing.
-    :param word: the word to be typed
-    :return: nothing
-    """
-    for c in word:
-        # Random delay of 50-200ms between typing each word
-        delay = random.uniform(0.05, 0.2)
-        pyautogui.typewrite(c)
-        time.sleep(delay)
-    pyautogui.press('enter')
-
-
 def play_sorting_game():
     """
     Locates the fruit and animal boxes, then for each of the objects, locates them on screen and performs
@@ -108,6 +93,27 @@ def play_ball_game():
         clicks += 1
 
 
+def type_word():
+    text = '123CAPabc!'
+    length = len(text)
+    seconds = random.uniform(1, 3)
+    pyautogui.typewrite(text, interval=seconds)
+
+
+def complete_keyboard_activity():
+    # Start capturing keystroke data
+    location = find_image('capture_btn.png', True)
+    click_image(location)
+    # Locate text box and type word
+    location = find_image('text_box.png', True)
+    click_image(location)
+    # Type word
+    type_word()
+    # Finish capturing
+    location = find_image('done_btn.png', True)
+    click_image(location)
+
+
 def click_start_button():
     start_button_location = find_image('start_btn.png', True)
     click_image(start_button_location)
@@ -115,16 +121,13 @@ def click_start_button():
 
 def main():
     time.sleep(1)
-    # Type something into the input box
-    # location = find_image('input_box.png', False)
-    # click_image(location)
-    # type_word('Hello world!')
-    # Click start_time button to begin recording
-    time.sleep(1)
+    # Click start_time button to begin
     click_start_button()
+    # Complete the keyboard activity
+    complete_keyboard_activity()
     # Play the ball clicking game
     play_ball_game()
-    # # Play the drag-and-drop sorting game
+    # Play the drag-and-drop sorting game
     play_sorting_game()
 
 

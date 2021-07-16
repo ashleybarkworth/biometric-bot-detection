@@ -5,14 +5,14 @@ import tkinter as tk
 import logger
 import argparse
 
-bg = 'light sky blue'
+bg = 'SlateGray1'
+
 canvas_width = 1100
 canvas_height = 800
 x_coord = 300
 y_coord = 100
 
 img_folder = 'img/'
-data_directory = '../data/events/'
 user_type = None
 
 
@@ -35,7 +35,7 @@ class MainApp(tk.Tk):
 
     def switch_canvas(self, canvas_class):
         """
-        Used to switch between different 'screens' in the img
+        Used to switch between different 'screens' of the GUI
         :param canvas_class: The canvas (scene) to switch to
         :return: nothing
         """
@@ -55,14 +55,14 @@ class MainApp(tk.Tk):
 class StartUpPage(tk.Canvas):
 
     def start(self):
-        logger.start_recording(data_directory, user_type)
-        self.master.switch_canvas(BallGame)
+        # logger.start_mouse_logging(user_type)
+        self.master.switch_canvas(Keyboard)
 
     def __init__(self, master, *args, **kwargs):
         tk.Canvas.__init__(self, master, bg=bg, highlightthickness=3, highlightbackground=bg,
                            width=canvas_width, height=canvas_height, *args, **kwargs)
         tk.Frame(self)
-        tk.Label(self, text='Bot or Not?', bg=bg, font='Verdana 60').pack(pady=50, fill='y')
+        tk.Label(self, text='Bot or Not?', bg=bg, font='Verdana 60').pack(pady=50, fill=tk.Y)
 
         instructions = 'INSTRUCTIONS: Complete three activities using your mouse and/or\n keyboard. After playing, ' \
                        'please close the windows to save your \nmouse and keyboard activity data in events.csv. '
@@ -73,8 +73,6 @@ class StartUpPage(tk.Canvas):
 
         tk.Button(self, text='START', command=self.start, width=10, height=2, font='Verdana 16').pack()
 
-        tk.Text(self, height=2, width=30).pack(pady=20)
-
         self.pack()
 
 
@@ -83,15 +81,53 @@ class EndPage(tk.Canvas):
     def __init__(self, master, *args, **kwargs):
         tk.Canvas.__init__(self, master, width=canvas_width, height=canvas_height, *args, **kwargs)
         tk.Frame(self)
-        tk.Label(self, text='Thanks for playing! This window will close shortly.', bg=bg, font='Verdana 24 bold').pack(fill=tk.X)
+        tk.Label(self, text='Thanks for playing! This window will close shortly.', bg=bg,
+                 font='Verdana 24 bold').pack(fill=tk.X)
         self.pack(expand=tk.YES)
         self.after(4000, self.master.destroy)
+
+
+class Keyboard(tk.Frame):
+
+    def end(self):
+        logger.stop_key_logging()
+        self.master.switch_canvas(BallGame)
+
+    def start(self):
+        logger.start_key_logging(user_type)
+
+    def __init__(self, master, *args, **kwargs):
+        tk.Frame.__init__(self, master, *args, **kwargs)
+        self.canvas = tk.Canvas(self, bg=bg, highlightthickness=3, highlightbackground=bg,
+                                width=canvas_width, height=canvas_height)
+
+        # self.master.geometry('{}x{}+{}+{}'.format(800, 400, x_coord, y_coord))
+
+        tk.Label(self, text='Bot or Not?', font='Helvetica 16 italic', bg=bg).pack(fill=tk.X)
+        self.master.configure(bg=bg)
+        tk.Label(self, text='Press Capture and type the following word 10 times', font='Arial 14 bold',
+                 fg='orange2', pady=20, bg=bg).pack(fill=tk.X)
+        self.master.configure(bg=bg)
+
+        tk.Label(self, text='123CAPabc!', bg=bg, font='Verdana 14 italic').pack(fill=tk.X)
+        tk.Text(self, height=10, width=40, padx=40, pady=40, highlightbackground=bg).pack(fill=tk.Y)
+
+        tk.Button(self, text='Capture', bg='lightgoldenrod', font='Helvetica 16 italic',
+                  command=self.start).pack(side=tk.LEFT)
+        self.configure(bg=bg)
+        tk.Button(self, text='Done', bg='lightgoldenrod', font='Helvetica 16 italic',
+                  command=self.end).pack(side=tk.RIGHT)
+        self.configure(bg=bg)
+        self.pack()
 
 
 class BallGame(tk.Frame):
 
     def end(self):
         pass
+
+    def start(self):
+        logger.start_mouse_logging(user_type)
 
     def on_click(self, event=None):
         self.ball_count += 1
@@ -110,6 +146,7 @@ class BallGame(tk.Frame):
             self.canvas.itemconfigure(self.ball, state='normal')
 
     def start_game(self):
+        logger.start_mouse_logging(user_type)
         self.start_btn.destroy()
         self.on_click(self)
 
@@ -117,6 +154,7 @@ class BallGame(tk.Frame):
         tk.Frame.__init__(self, master, *args, **kwargs)
         self.canvas = tk.Canvas(self, bg=bg, highlightthickness=3, highlightbackground=bg,
                                 width=canvas_width, height=canvas_height)
+        self.master.geometry('{}x{}+{}+{}'.format(canvas_width, canvas_height, x_coord, y_coord))
 
         instructions = 'INSTRUCTIONS: Click on the ball 10 times.'
         tk.Label(self, text=instructions, bg=bg, width=200, font='Verdana 14 bold').pack(pady=20)
@@ -261,6 +299,7 @@ class SortingGame(tk.Frame):
         self.correct_label['text'] = 'Correct: ' + str(self.correct)
 
         if self.correct == 8 or self.moves == 16:
+            logger.stop_mouse_logging()
             self.master.switch_canvas(EndPage)
 
     def drag(self, event):

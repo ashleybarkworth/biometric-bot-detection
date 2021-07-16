@@ -4,13 +4,18 @@ import os
 from actions import MouseEvent, MouseState, MouseAction, ActionType
 from featureExtraction.sessions import Session
 
-events_directory = '../data/events/'
-actions_directory = '../data/actions/'
-sessions_directory = '../data/sessions/'
+data_directory = '../data/'
 
-simplebot_folder = 'simplebot'
-advancedbot_folder = 'advancedbot'
-human_folder = 'human'
+key_folder = 'key/'
+mouse_folder = 'mouse/'
+
+events_folder = 'events/'
+actions_folder = 'actions/'
+sessions_folder = 'sessions/'
+
+simplebot_folder = 'simplebot/'
+advancedbot_folder = 'advancedbot/'
+human_folder = 'human/'
 
 
 def point_drag(i, rows):
@@ -28,7 +33,7 @@ def parse_actions_from_events(subdirectory, filename):
     mouse_events = []
     actions = []
 
-    filepath = os.path.join(events_directory, subdirectory, filename)
+    filepath = os.path.join(subdirectory, filename)
 
     with open(filepath) as csv_file:
         csv_reader = csv.DictReader(csv_file)
@@ -72,8 +77,8 @@ def parse_actions_from_events(subdirectory, filename):
     return actions
 
 
-def create_action_file(actions, subdirectory, filename):
-    filepath = os.path.join(actions_directory, subdirectory, filename)
+def create_action_file(actions, folder, filename):
+    filepath = os.path.join(data_directory, mouse_folder, actions_folder, folder, filename)
     with open(filepath, 'w') as file:
         writer = csv.writer(file)
         write_action_csv_header(writer)
@@ -88,9 +93,9 @@ def write_action_csv_header(writer):
     writer.writerow(header)
 
 
-def create_session_file(session, subdirectory, filename):
+def create_session_file(session, folder, filename):
     session_feature_row = session.calculate_features()
-    filepath = os.path.join(sessions_directory, subdirectory, filename)
+    filepath = os.path.join(data_directory, mouse_folder, sessions_folder, folder, filename)
     with open(filepath, 'w') as file:
         writer = csv.writer(file)
         write_session_csv_header(writer)
@@ -129,14 +134,40 @@ def write_session_csv_header(writer):
     writer.writerow(header)
 
 
+def extract_key_features():
+    key_events_folder = os.path.join(data_directory, key_folder, events_folder)
+    # For each of the user type folders (advancedBot, human, simpleBot)
+    for folder in os.listdir(key_events_folder):
+        # Ensure it's a directory
+        subdirectory = os.path.join(key_events_folder, folder)
+        if os.path.isdir(subdirectory):
+            # For each file in the user type folder
+            for file in os.listdir(subdirectory):
+                # Ensure it's a directory
+                if not file.startswith('.'):
+                    pass
+
+
+def extract_mouse_features():
+    mouse_events_folder = os.path.join(data_directory, mouse_folder, events_folder)
+    mouse_actions_folder = os.path.join(data_directory, mouse_folder, actions_folder)
+    # For each of the user type folders (advancedBot, human, simpleBot)
+    for folder in os.listdir(mouse_events_folder):
+        # Ensure it's a directory
+        subdirectory = os.path.join(mouse_events_folder, folder)
+        if os.path.isdir(subdirectory):
+            # For each file in the user type folder
+            for file in os.listdir(subdirectory):
+                if not file.startswith('.'):
+                    actions = parse_actions_from_events(subdirectory, file)
+                    create_action_file(actions, folder, file)
+                    session = Session(folder, actions, file)
+                    create_session_file(session, folder, file)
+
+
 def main():
-    for folder in os.listdir(events_directory):
-        subdirectory = os.path.join(events_directory, folder)
-        for file in os.listdir(subdirectory):
-            actions = parse_actions_from_events(folder, file)
-            create_action_file(actions, folder, file)
-            session = Session(file, actions, folder)
-            create_session_file(session, folder, file)
+    extract_key_features()
+    extract_mouse_features()
 
 
 if __name__ == '__main__':

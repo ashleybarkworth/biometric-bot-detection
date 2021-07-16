@@ -1,12 +1,12 @@
 import math
 import time
+import random
 
 import pyautogui
 
 region = (600, 200, 2200, 1600)
 
 img_folder = 'img/'
-speed = 300
 
 
 def find_center(location):
@@ -50,20 +50,9 @@ def click_image(location):
     if location is not None:
         x, y = find_center(location)
         x_now, y_now = pyautogui.position()
-        length = math.sqrt(pow(abs(x - x_now), 2) + pow(abs(y - y_now), 2))
-        pyautogui.moveTo(x, y, duration=float(length/speed))
+        # length = math.sqrt(pow(abs(x - x_now), 2) + pow(abs(y - y_now), 2))
+        pyautogui.moveTo(x, y, duration=0.05)
         pyautogui.leftClick()
-
-
-def type_word(word):
-    """
-    Types word by performing a keyboard key press down, followed by a release, for each of
-    the characters in it
-    :param word: the word to be typed
-    :return: nothing
-    """
-    pyautogui.typewrite(word)
-    pyautogui.press('enter')
 
 
 def play_sorting_game():
@@ -104,6 +93,26 @@ def play_ball_game():
         clicks += 1
 
 
+def type_word():
+    text = '123CAPabc!'
+    length = len(text)
+    pyautogui.typewrite(text)
+
+
+def complete_keyboard_activity():
+    # Start capturing keystroke data
+    location = find_image('capture_btn.png', True)
+    click_image(location)
+    # Locate text box and type word
+    location = find_image('text_box.png', True)
+    click_image(location)
+    # Type word
+    type_word()
+    # Finish capturing
+    location = find_image('done_btn.png', True)
+    click_image(location)
+
+
 def click_start_button():
     location = find_image('start_btn.png', True)
     click_image(location)
@@ -112,12 +121,10 @@ def click_start_button():
 def main():
     pyautogui.MINIMUM_DURATION = 0
     time.sleep(1)
-    # Type something into the input box
-    location = find_image('input_box.png', False)
-    click_image(location)
-    type_word('hello world')
-    # Click start_time button to begin recording
+    # Click start_time button to begin
     click_start_button()
+    # Complete the keyboard activity
+    complete_keyboard_activity()
     # Play the ball clicking game
     play_ball_game()
     # Play the drag-and-drop sorting game

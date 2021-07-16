@@ -1,0 +1,17 @@
+Key pressed,Key released,Time
+s,None,0.43
+d,None,0.52
+None,'s',0.6
+f,None,0.61
+None,'d',0.67
+d,None,0.7
+s,None,0.72
+None,'s',0.83
+None,'d',0.84
+v,None,0.85
+None,'f',0.89
+w,None,1.01
+None,'v',1.09
+None,'w',1.14
+r,None,1.2
+None,'r',1.25
