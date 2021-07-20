@@ -3,7 +3,7 @@ import time
 import pyautogui
 from utility import bezier_curve
 
-region = (600, 200, 2200, 1600)
+region = (400, 200, 2200, 1600)
 
 img_folder = 'img/'
 
@@ -29,10 +29,10 @@ def find_image(img, grayscale):
     """
     filepath = img_folder + img
     location = None
-    timeout = time.time() + 3  # Wait up to 3 seconds to find image
+    timeout = time.time() + 5  # Wait up to 5 seconds to find image
     while location is None and time.time() < timeout:
         try:
-            location = pyautogui.locateOnScreen(filepath, confidence=.65, grayscale=grayscale, region=region)
+            location = pyautogui.locateOnScreen(filepath, confidence=.8, grayscale=grayscale, region=region)
         except Exception as e:
             print(e)
 
@@ -59,12 +59,9 @@ def play_sorting_game():
     """
     objects = ['apple', 'banana', 'beaver', 'cat', 'dog', 'monkey', 'strawberry', 'orange']  # list of objects to sort
     random.shuffle(objects)  # sort objects in random order
-
-    print('start_time sorting')
-    fx, fy = find_center(find_image('fruits_box.png', True))
-    print('fruit box found')
-    ax, ay = find_center(find_image('animals_box.png', True))
-    print('animal box found')
+    time.sleep(1.5)
+    fx, fy = find_center(find_image('fruits_box.png', False))
+    ax, ay = find_center(find_image('animals_box.png', False))
 
     for obj in objects:
         fruits = ['apple', 'orange', 'banana', 'strawberry']
@@ -73,11 +70,11 @@ def play_sorting_game():
         x, y = find_center(find_image(img, False))
         bezier_curve.moveTo(x, y)
 
-        speed = random.uniform(0.3, 1.2)
+        duration = random.uniform(0.3, 1.2)
         if obj in fruits:
-            pyautogui.dragTo(fx, fy, duration=speed, button='left', tween=pyautogui.easeOutQuad)
+            pyautogui.dragTo(fx, fy, duration=duration, button='left', tween=pyautogui.easeOutQuad)
         elif obj in animals:
-            pyautogui.dragTo(ax, ay, duration=speed, button='left', tween=pyautogui.easeOutQuad)
+            pyautogui.dragTo(ax, ay, duration=duration, button='left', tween=pyautogui.easeOutQuad)
 
 
 def play_ball_game():
@@ -95,7 +92,6 @@ def play_ball_game():
 
 def type_word():
     text = '123CAPabc!'
-    length = len(text)
     seconds = random.uniform(1, 3)
     pyautogui.typewrite(text, interval=seconds)
 

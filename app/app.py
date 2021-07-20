@@ -1,25 +1,23 @@
 import random
-from enum import Enum
 from random import randint
 import tkinter as tk
 import logger
 import argparse
 
+# GUI Background colour
 bg = 'SlateGray1'
 
+# GUI screen width, height, and upper left corner (x,y) coordinates
 canvas_width = 1100
 canvas_height = 800
-x_coord = 300
+x_coord = 200
 y_coord = 100
 
+# Image folder containing objects for ball and sorting games
 img_folder = 'img/'
+
+# Either human, simple (Simple Bot), or advanced (Advanced Bot)
 user_type = None
-
-
-class UserType(Enum):
-    HUMAN = 'Human'
-    SIMPLE_BOT = 'Simple Bot'
-    ADV_BOT = 'Advanced Bot'
 
 
 class MainApp(tk.Tk):
@@ -55,7 +53,6 @@ class MainApp(tk.Tk):
 class StartUpPage(tk.Canvas):
 
     def start(self):
-        # logger.start_mouse_logging(user_type)
         self.master.switch_canvas(Keyboard)
 
     def __init__(self, master, *args, **kwargs):
@@ -90,10 +87,17 @@ class EndPage(tk.Canvas):
 class Keyboard(tk.Frame):
 
     def end(self):
-        logger.stop_key_logging()
-        self.master.switch_canvas(BallGame)
+        if self.capture_started:
+            # Stop logging key data and switch to ball game
+            logger.stop_key_logging()
+            self.master.switch_canvas(BallGame)
+        else:
+            # Display error message for 2 second
+            self.error.config(fg='red')
+            self.error.after(2000, lambda color=bg: self.error.config(fg=color))
 
     def start(self):
+        self.capture_started = True
         logger.start_key_logging(user_type)
 
     def __init__(self, master, *args, **kwargs):
@@ -101,23 +105,31 @@ class Keyboard(tk.Frame):
         self.canvas = tk.Canvas(self, bg=bg, highlightthickness=3, highlightbackground=bg,
                                 width=canvas_width, height=canvas_height)
 
-        # self.master.geometry('{}x{}+{}+{}'.format(800, 400, x_coord, y_coord))
+        instructions = 'Press \'Capture\' and type the following word 10 times'
+        tk.Label(self, text=instructions, font='Verdana 14 bold', fg='orange2', bg=bg).pack(fill=tk.X, pady=(10, 0))
+        self.master.configure(bg=bg)
 
-        tk.Label(self, text='Bot or Not?', font='Helvetica 16 italic', bg=bg).pack(fill=tk.X)
-        self.master.configure(bg=bg)
-        tk.Label(self, text='Press Capture and type the following word 10 times', font='Arial 14 bold',
-                 fg='orange2', pady=20, bg=bg).pack(fill=tk.X)
-        self.master.configure(bg=bg)
+        # Error message shown if user clicks "Done" before "Capture"
+        error_msg = 'Please press \'Capture\' and type the word first.'
+        self.error = tk.Label(self, text=error_msg, font='Verdana 14 bold', fg=bg, bg=bg)
+        self.error.pack(pady=(0, 5))
 
         tk.Label(self, text='123CAPabc!', bg=bg, font='Verdana 14 italic').pack(fill=tk.X)
         tk.Text(self, height=10, width=40, padx=40, pady=40, highlightbackground=bg).pack(fill=tk.Y)
 
-        tk.Button(self, text='Capture', bg='lightgoldenrod', font='Helvetica 16 italic',
-                  command=self.start).pack(side=tk.LEFT)
+        # Indicates whether key logger has started capturing
+        self.capture_started = False
+
+        tk.Button(self, text='Capture', bg='lightgoldenrod', font='Verdana 16', command=self.start).pack(side=tk.LEFT,
+                                                                                                         anchor=tk.E,
+                                                                                                         pady=10)
         self.configure(bg=bg)
-        tk.Button(self, text='Done', bg='lightgoldenrod', font='Helvetica 16 italic',
-                  command=self.end).pack(side=tk.RIGHT)
+
+        tk.Button(self, text='Done', bg='lightgoldenrod', font='Verdana 16', command=self.end).pack(side=tk.RIGHT,
+                                                                                                    anchor=tk.W,
+                                                                                                    pady=10)
         self.configure(bg=bg)
+
         self.pack()
 
 
@@ -126,28 +138,26 @@ class BallGame(tk.Frame):
     def end(self):
         pass
 
-    def start(self):
-        logger.start_mouse_logging(user_type)
-
     def on_click(self, event=None):
         self.ball_count += 1
         if self.ball_count > 10:
+            print('done')
             self.master.switch_canvas(SortingGame)
         else:
-            # Hide both ball and spiky
+            # Hide ball
             self.canvas.itemconfigure(self.ball, state='hidden')
 
             # Choose random location for next object to appear
             x = randint(85, canvas_width - 85)
             y = randint(50, canvas_height - 180)
 
-            # Choose either ball or spiky to appear randomly
+            # Move ball to new location
             self.canvas.coords(self.ball, x, y)
             self.canvas.itemconfigure(self.ball, state='normal')
 
     def start_game(self):
         logger.start_mouse_logging(user_type)
-        self.start_btn.destroy()
+        self.start_btn.pack_forget()
         self.on_click(self)
 
     def __init__(self, master, *args, **kwargs):
@@ -170,11 +180,7 @@ class BallGame(tk.Frame):
         self.ball_img = tk.PhotoImage(file=img_folder + 'ball.png')
         self.ball = self.canvas.create_image(canvas_width / 2, canvas_height / 2, image=self.ball_img, tags='ball')
         self.canvas.itemconfigure(self.ball, state='hidden')
-
         self.canvas.tag_bind('ball', '<Button-1>', self.on_click)
-
-        self.time_label = tk.Label(self, bg=bg, font='Verdana 24')
-        self.time_label.pack(side=tk.BOTTOM, pady=(0, 20))
 
         self.canvas.pack()
 
@@ -188,28 +194,37 @@ class SortingGame(tk.Frame):
                                 width=canvas_width, height=canvas_height)
 
         instructions = 'INSTRUCTIONS: Sort the following items into the boxes below'
-        tk.Label(self, text=instructions, bg=bg, width=200, font='Verdana 14 bold').pack(pady=20)
+        tk.Label(self, text=instructions, bg=bg, width=200, font='Verdana 14 bold').pack(pady=10)
         self.configure(bg=bg)
-
-        # Number of moves made
-        self.moves = 0
 
         # Number of correct sorts
         self.correct = 0
 
         # Boxes
-        box_width, box_height = 480, 270
-        padding = 25
+        box_width, box_height = 480, 255
+        x_padding, y_padding = 25, 40
         mid = canvas_width / 2
-        y2 = canvas_height - y_coord - padding
-        y1 = y2 - box_height
-        self.canvas.create_text((padding + box_width / 2, y1 - 20), text='FRUITS', font='Verdana 18 bold')
-        self.fruit_box = self.canvas.create_rectangle(mid - padding - box_width, y1, mid - padding, y2, fill='white',
-                                                      outline='black', tags='fruit_box')
 
-        self.canvas.create_text((mid + padding + box_width / 2, y1 - 20), text='ANIMALS', font='Verdana 18 bold')
-        self.animal_box = self.canvas.create_rectangle(mid + padding, y1, mid + padding + box_width, y2, fill='white',
-                                                       outline='black', tags='animals_box')
+        # Coordinates for box and box label positions
+        y2 = canvas_height - y_coord - y_padding
+        x1 = mid - x_padding
+        y1 = y2 - box_height
+        x2 = mid + x_padding
+
+        # [(lx, ly), (bx1, by1, bx2, by2)]
+        # (lx, ly) are (x,y) coordinates for box's label
+        # (bx1, by1, bx2, by2) are (x,y) coordinates for box's upper left (bx1, by1) and bottom right (bx2, by2) corner
+        pos1 = [(x_padding + (box_width / 2), y1 - 20), (x1 - box_width, y2 - box_height, x1, y2)]
+        pos2 = [(x2 + (box_width / 2), y1 - 20), (x2, y2 - box_height, x2 + box_width, y2)]
+        # Shuffle positions
+        positions = [pos1, pos2]
+        # random.shuffle(positions)
+
+        self.canvas.create_text(*positions[0][0], text='FRUITS', font='Verdana 18 bold')
+        self.fruit_box = self.canvas.create_rectangle(*positions[0][1], fill='white', outline='black', tags='fruit_box')
+
+        self.canvas.create_text(*positions[1][0], text='ANIMALS', font='Verdana 18 bold')
+        self.animal_box = self.canvas.create_rectangle(*positions[1][1], fill='white', outline='black', tags='animals_box')
 
         # Create draggable objects
         self._drag_data = {'x': 0, 'y': 0, 'item': None}
@@ -251,12 +266,12 @@ class SortingGame(tk.Frame):
         self.monkey_img = tk.PhotoImage(file=img_folder + 'monkey.png')
         self.monkey_token = self.create_image_token(positions[7][0], positions[7][1], self.monkey_img)
 
+        self.correct_label = tk.Label(self, bg=bg, font='Verdana 18 bold', text='Correct: ' + str(self.correct))
+        self.correct_label.pack(side=tk.BOTTOM, pady=(0, 20))
+
         self.canvas.tag_bind('token', '<ButtonPress-1>', self.drag_start)
         self.canvas.tag_bind('token', '<ButtonRelease-1>', self.drag_stop)
         self.canvas.tag_bind('token', '<B1-Motion>', self.drag)
-
-        self.correct_label = tk.Label(self, bg=bg, font='Verdana 18 bold', text='Correct: ' + str(self.correct))
-        self.correct_label.pack(side=tk.BOTTOM, pady=(0, 20))
 
         self.canvas.pack()
 
@@ -292,13 +307,12 @@ class SortingGame(tk.Frame):
         self._drag_data['item'] = None
         self._drag_data['x'] = 0
         self._drag_data['y'] = 0
-        self.moves += 1
 
         self.correct = self.num_correct_fruits() + self.num_correct_animals()
 
         self.correct_label['text'] = 'Correct: ' + str(self.correct)
 
-        if self.correct == 8 or self.moves == 16:
+        if self.correct == 8:
             logger.stop_mouse_logging()
             self.master.switch_canvas(EndPage)
 

@@ -44,7 +44,7 @@ class MouseAction:
         self.a = self.sd_a = self.max_a = self.min_a = 0
         self.j = self.sd_j = self.max_j = self.min_j = 0
         self.omega = self.sd_omega = self.max_omega = self.min_omega = 0
-        self.curv = self.sd_curv = self.max_curv = self.min_curv = 0
+        self.curvature = self.sd_curv = self.max_curv = self.min_curv = 0
 
     def __str__(self):
         return f'Mouse Action: {self.action_type}\nNumber of Events: {len(self.events)}'
@@ -52,8 +52,6 @@ class MouseAction:
     def calculate_features(self):
         self.n = len(self.events)
         vx, vy, v, thetas, path = ([0] for _ in range(5))
-        sum_of_angles = 0
-        self.trajectory = 0
 
         for i in range(1, self.n):
             curr_event = self.events[i]
@@ -102,7 +100,7 @@ class MouseAction:
 
         # Curvature
         curvature = self.calculate_curvature(path, thetas)
-        self.curv = statistics.mean(curvature)
+        self.curvature = statistics.mean(curvature)
 
         first_pt = self.events[0]
         last_pt = self.events[-1]
@@ -129,7 +127,7 @@ class MouseAction:
 
         # Generate CSV row
         return map(str, [self.action_type, self.duration, self.direction, self.trajectory, self.distance,
-                         self.straightness, self.n, self.max_deviation, self.sum_of_angles, self.curv, self.omega,
+                         self.straightness, self.n, self.max_deviation, self.sum_of_angles, self.curvature, self.omega,
                          self.vx, self.vy, self.v, self.a, self.j])
 
     def calculate_acceleration(self, n, v):

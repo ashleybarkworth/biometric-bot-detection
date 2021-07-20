@@ -9,14 +9,14 @@ import math
 def moveTo(x2, y2):
     disable_pauses()
     x1, y1 = pyautogui.position()
-    cp = random.randint(3, 3)  # Number of control points. Must be at least 2.
+    cp = random.randint(3, 5)  # Number of control points. Must be at least 2.
 
     # Distribute control points between start_time and destination evenly.
     x = np.linspace(x1, x2, num=cp, dtype='int')
     y = np.linspace(y1, y2, num=cp, dtype='int')
 
     # Randomise inner points a bit (+-RAND at most).
-    RAND = 50
+    RAND = 80
     xr = [random.randint(-RAND, RAND) for k in range(cp)]
     yr = [random.randint(-RAND, RAND) for k in range(cp)]
     xr[0] = yr[0] = xr[-1] = yr[-1] = 0

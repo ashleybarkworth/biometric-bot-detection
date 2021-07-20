@@ -1,10 +1,8 @@
-import math
 import time
-import random
 
 import pyautogui
 
-region = (600, 200, 2200, 1600)
+region = (400, 200, 2200, 1600)
 
 img_folder = 'img/'
 
@@ -33,7 +31,7 @@ def find_image(img, grayscale):
     timeout = time.time() + 10  # Wait up to 10 seconds to find image
     while location is None and time.time() < timeout:
         try:
-            location = pyautogui.locateOnScreen(filepath, confidence=.65, grayscale=grayscale, region=region)
+            location = pyautogui.locateOnScreen(filepath, confidence=.8, grayscale=grayscale, region=region)
         except Exception as e:
             print(e)
 
@@ -49,10 +47,8 @@ def click_image(location):
     global speed
     if location is not None:
         x, y = find_center(location)
-        x_now, y_now = pyautogui.position()
-        # length = math.sqrt(pow(abs(x - x_now), 2) + pow(abs(y - y_now), 2))
-        pyautogui.moveTo(x, y, duration=0.05)
-        pyautogui.leftClick()
+        pyautogui.moveTo(x, y)
+        pyautogui.click()
 
 
 def play_sorting_game():
@@ -63,8 +59,8 @@ def play_sorting_game():
     """
     objects = ['apple', 'banana', 'beaver', 'cat', 'dog', 'monkey', 'strawberry', 'orange']
 
-    fx, fy = find_center(find_image('fruits_box.png', True))
-    ax, ay = find_center(find_image('animals_box.png', True))
+    fx, fy = find_center(find_image('fruits_box.png', False))
+    ax, ay = find_center(find_image('animals_box.png', False))
 
     fruits = ['apple', 'orange', 'banana', 'strawberry']
     animals = ['beaver', 'cat', 'dog', 'monkey']
@@ -72,7 +68,7 @@ def play_sorting_game():
     for obj in objects:
         img = ''.join([obj, '.png'])
         x, y = find_center(find_image(img, False))
-        pyautogui.moveTo(x, y, duration=0.05)
+        pyautogui.moveTo(x, y)
 
         if obj in fruits:
             pyautogui.dragTo(fx, fy, button='left')
@@ -95,7 +91,6 @@ def play_ball_game():
 
 def type_word():
     text = '123CAPabc!'
-    length = len(text)
     pyautogui.typewrite(text)
 
 
@@ -128,6 +123,7 @@ def main():
     # Play the ball clicking game
     play_ball_game()
     # Play the drag-and-drop sorting game
+    time.sleep(1.5)
     play_sorting_game()
 
 
