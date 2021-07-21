@@ -1,6 +1,6 @@
 import statistics
 
-from featureExtraction.actions import ActionType
+from feature_extraction.actions import ActionType
 
 
 class Session:

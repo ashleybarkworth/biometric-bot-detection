@@ -53,7 +53,6 @@ def click_image(location):
         pyautogui.mouseDown()
         time.sleep(click_time)
         pyautogui.mouseUp()
-        # pyautogui.click(interval=click_time)
 
 
 def play_sorting_game():
@@ -75,7 +74,7 @@ def play_sorting_game():
         x, y = find_center(find_image(img, False))
         bezier_curve.moveTo(x, y)
 
-        duration = random.uniform(0.3, 1.2)
+        duration = random.uniform(0.5, 1.5)
         if obj in fruits:
             pyautogui.dragTo(fx, fy, duration=duration, button='left', tween=pyautogui.easeOutQuad)
         elif obj in animals:

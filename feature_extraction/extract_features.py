@@ -1,5 +1,4 @@
-
-from featureExtraction import mouse_features, key_features
+from feature_extraction import mouse_features, key_features
 
 
 def main():

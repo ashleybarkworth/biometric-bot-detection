@@ -1,8 +1,8 @@
 import csv
 import os
 
-from featureExtraction.actions import ActionType, MouseEvent, MouseState, MouseAction
-from featureExtraction.sessions import Session
+from feature_extraction.actions import ActionType, MouseEvent, MouseState, MouseAction
+from feature_extraction.sessions import Session
 
 data_directory = '../data/'
 mouse_folder = 'mouse/'
