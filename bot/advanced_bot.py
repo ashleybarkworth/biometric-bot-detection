@@ -1,7 +1,7 @@
 import random
 import time
 import pyautogui
-from utility import bezier_curve
+from util import bezier_curve
 
 region = (400, 200, 2200, 1600)
 
@@ -48,7 +48,12 @@ def click_image(location):
     if location is not None:
         x, y = find_center(location)
         bezier_curve.moveTo(x, y)
-        pyautogui.leftClick()
+        # Time between press and release
+        click_time = random.uniform(0.1, 0.2)
+        pyautogui.mouseDown()
+        time.sleep(click_time)
+        pyautogui.mouseUp()
+        # pyautogui.click(interval=click_time)
 
 
 def play_sorting_game():
@@ -90,10 +95,15 @@ def play_ball_game():
         clicks += 1
 
 
-def type_word():
+def type_words():
+    times = 10
     text = '123CAPabc!'
-    seconds = random.uniform(1, 3)
-    pyautogui.typewrite(text, interval=seconds)
+    for i in range(times):
+        seconds = random.uniform(0.5, 2)
+        pyautogui.typewrite(text, interval=seconds)
+        # Enter new line after all but last word
+        if i < times - 1:
+            pyautogui.press('enter')
 
 
 def complete_keyboard_activity():
@@ -104,7 +114,7 @@ def complete_keyboard_activity():
     location = find_image('text_box.png', True)
     click_image(location)
     # Type word
-    type_word()
+    type_words()
     # Finish capturing
     location = find_image('done_btn.png', True)
     click_image(location)
@@ -121,6 +131,7 @@ def main():
     click_start_button()
     # Complete the keyboard activity
     complete_keyboard_activity()
+    time.sleep(1)
     # Play the ball clicking game
     play_ball_game()
     # Play the drag-and-drop sorting game

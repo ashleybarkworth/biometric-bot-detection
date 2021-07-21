@@ -1,8 +1,8 @@
 import csv
+import os.path
 import time
 from datetime import datetime
 from os.path import join
-import keyboard as k
 
 from pynput import mouse
 from pynput import keyboard
@@ -13,9 +13,9 @@ key_folder = 'key/'
 mouse_folder = 'mouse/'
 events_folder = 'events/'
 
-# Filenames to save mouse/keystroke data to
-key_filename = datetime.now().strftime("%Y_%m_%d-%H:%M:%S.csv")
-mouse_filename = datetime.now().strftime("%Y_%m_%d-%H:%M:%S.csv")
+
+# Time that app starts running (used in key and mouse file names)
+start_time = datetime.now().strftime('%Y%m%d-%H%M%S')
 
 # Complete file paths for mouse/keystroke data
 key_filepath = ''
@@ -66,8 +66,9 @@ def get_key_data_filepath(user_type):
     :param user_type: human, simple, or advanced
     """
     global key_filepath
+    filename = ''.join([start_time, '_', user_type, '.csv'])
     directory = get_directory('key', user_type)
-    key_filepath = directory + key_filename
+    key_filepath = os.path.join(directory, filename)
 
 
 def get_mouse_data_filepath(user_type):
@@ -76,8 +77,9 @@ def get_mouse_data_filepath(user_type):
     :param user_type: human, simple, or advanced
     """
     global mouse_filepath
+    filename = ''.join([start_time, '_', user_type, '.csv'])
     directory = get_directory('mouse', user_type)
-    mouse_filepath = directory + mouse_filename
+    mouse_filepath = os.path.join(directory, filename)
 
 
 # def write_key_row(keypressed, keyreleased, timestamp, Hold_time, press_release):

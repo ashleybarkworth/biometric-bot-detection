@@ -89,20 +89,25 @@ def play_ball_game():
         clicks += 1
 
 
-def type_word():
+def type_words():
+    times = 10
     text = '123CAPabc!'
-    pyautogui.typewrite(text)
+    for i in range(times):
+        pyautogui.typewrite(text)
+        # Enter new line after all but last word
+        if i < times - 1:
+            pyautogui.press('enter')
 
 
 def complete_keyboard_activity():
-    # Start capturing keystroke data
+    # Start capturing keystroke training_data
     location = find_image('capture_btn.png', True)
     click_image(location)
     # Locate text box and type word
     location = find_image('text_box.png', True)
     click_image(location)
-    # Type word
-    type_word()
+    # Type words
+    type_words()
     # Finish capturing
     location = find_image('done_btn.png', True)
     click_image(location)
@@ -123,7 +128,7 @@ def main():
     # Play the ball clicking game
     play_ball_game()
     # Play the drag-and-drop sorting game
-    time.sleep(1.5)
+    time.sleep(1)
     play_sorting_game()
 
 

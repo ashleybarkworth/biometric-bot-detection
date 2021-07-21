@@ -62,9 +62,9 @@ class StartUpPage(tk.Canvas):
         tk.Label(self, text='Bot or Not?', bg=bg, font='Verdana 60').pack(pady=50, fill=tk.Y)
 
         instructions = 'INSTRUCTIONS: Complete three activities using your mouse and/or\n keyboard. After playing, ' \
-                       'please close the windows to save your \nmouse and keyboard activity data in events.csv. '
+                       'your mouse and keyboard activity data are saved to 2 CSV files. '
 
-        tk.Label(self, text=instructions, bg=bg, width=50, font='Verdana 14 bold').pack()
+        tk.Label(self, text=instructions, bg=bg, width=80, font='Verdana 14 bold').pack()
 
         tk.Label(self, text='Click the button to begin', bg=bg, pady=20, font='Verdana 16 italic').pack()
 
@@ -141,7 +141,6 @@ class BallGame(tk.Frame):
     def on_click(self, event=None):
         self.ball_count += 1
         if self.ball_count > 10:
-            print('done')
             self.master.switch_canvas(SortingGame)
         else:
             # Hide ball

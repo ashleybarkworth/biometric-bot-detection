@@ -1,7 +1,7 @@
 import math
 import statistics
 from enum import Enum
-from utility.direction import get_bearings
+from util.direction import get_bearings
 
 CURV_THRESHOLD = 0.0005
 
@@ -51,7 +51,7 @@ class MouseAction:
 
     def calculate_features(self):
         self.n = len(self.events)
-        vx, vy, v, thetas, path = ([0] for _ in range(5))
+        vx, vy, v, thetas, path = ([] for _ in range(5))
 
         for i in range(1, self.n):
             curr_event = self.events[i]
@@ -88,19 +88,15 @@ class MouseAction:
 
         # Acceleration
         a = self.calculate_acceleration(self.n, v)
-        self.a = statistics.mean(a)
 
         # Jerk
-        j = self.calculate_jerk(a)
-        self.j = statistics.mean(j)
+        self.calculate_jerk(a)
 
         # Angular Velocity
-        omega = self.calculate_angular_velocity(thetas)
-        self.omega = statistics.mean(omega)
+        self.calculate_angular_velocity(thetas)
 
         # Curvature
-        curvature = self.calculate_curvature(path, thetas)
-        self.curvature = statistics.mean(curvature)
+        self.calculate_curvature(path, thetas)
 
         first_pt = self.events[0]
         last_pt = self.events[-1]
@@ -122,7 +118,7 @@ class MouseAction:
         # Largest deviation from the end-to-end line
         self.max_deviation = self.largest_deviation(self.n)
 
-        # Direction (-pi,...,pi)
+        # Direction
         self.direction = get_bearings(first_pt, last_pt)
 
         # Generate CSV row
@@ -131,8 +127,7 @@ class MouseAction:
                          self.vx, self.vy, self.v, self.a, self.j])
 
     def calculate_acceleration(self, n, v):
-        a = [0]
-
+        a = []
         for i in range(1, n - 1):
             curr_event = self.events[i]
             prev_event = self.events[i - 1]
@@ -140,19 +135,20 @@ class MouseAction:
             dt = curr_event.time - prev_event.time
             a_i = dv / dt
             a.append(a_i)
+        self.a = 0 if len(a) < 1 else statistics.mean(a)
         return a
 
     def calculate_jerk(self, a):
-        j = [0]
+        j = []
         for i in range(1, len(a)):
             curr_event = self.events[i]
             prev_event = self.events[i - 1]
             j_i = a[i] - a[i - 1] / (curr_event.time - prev_event.time)
             j.append(j_i)
-        return j
+        self.j = 0 if len(j) < 1 else statistics.mean(j)
 
     def calculate_angular_velocity(self, theta):
-        omega = [0]
+        omega = []
         for i in range(1, len(theta)):
             curr_event = self.events[i]
             prev_event = self.events[i - 1]
@@ -160,10 +156,10 @@ class MouseAction:
             dt = curr_event.time - prev_event.time
             omega_i = dtheta / dt
             omega.append(omega_i)
-        return omega
+        self.omega = 0 if len(omega) < 1 else statistics.mean(omega)
 
     def calculate_curvature(self, path, theta):
-        curvature = [0]
+        curvature = []
         num_critical_points = 0
         for i in range(1, len(path)):
             dp = path[i] - path[i - 1]
@@ -174,7 +170,7 @@ class MouseAction:
             curvature.append(curv_i)
             if abs(curv_i) < CURV_THRESHOLD:
                 num_critical_points += 1
-        return curvature
+        self.curvature = 0 if len(curvature) < 1 else statistics.mean(curvature)
 
     def largest_deviation(self, n):
         first_pt = self.events[0]
@@ -195,5 +191,4 @@ class MouseAction:
                 max_distance = distance
             if denominator > 0:
                 max_distance /= denominator
-
         return max_distance
