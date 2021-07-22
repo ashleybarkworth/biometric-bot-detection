@@ -1,6 +1,4 @@
 import os
-from os.path import join
-
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.model_selection import train_test_split, cross_val_score, cross_validate

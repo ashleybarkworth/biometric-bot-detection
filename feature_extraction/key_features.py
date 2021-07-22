@@ -9,9 +9,10 @@ unshifted = dict([reversed(i) for i in shifted.items()])
 def create_key_feature_file(features_directory, folder, feature_row):
     filepath = os.path.join(features_directory, folder, 'key.csv')
 
-    header = ['Total time taken', 'Average hold time', 'Max hold time', 'Min hold time', 'Average CPR time',
-              'Max CPR time', 'Min CPR time', 'Average Release Latency', 'Max Release Latency', 'Min Release Latency',
-              'Average Press Latency', 'Max Press Latency', 'Min Press Latency']
+    header = ['Total time taken', 'Average hold time', 'Max hold time', 'Min hold time', 'SD hold time',
+              'Average CPR time', 'Max CPR time', 'Min CPR time', 'SD CPR time',
+              'Average Release Latency', 'Max Release Latency', 'Min Release Latency', 'SD Release Latency',
+              'Average Press Latency', 'Max Press Latency', 'Min Press Latency', 'SD Press Latency']
 
     with open(filepath, 'w') as file:
         writer = csv.writer(file)
@@ -21,8 +22,7 @@ def create_key_feature_file(features_directory, folder, feature_row):
 
 def not_a_typo(key_pressed, key_released):
     # This checks that for a specific event, either the key pressed contains an important character or the key released
-    # contains and important character. 'Important' characters must either be Key.shift or one of the characters in
-    # '123CAPabc!'.
+    # contains an important character. 'Important' characters are Key.shift or one of the characters in '123CAPabc!'.
     pressed_key = key_pressed != 'None' and 'Key.shift' in key_pressed or key_pressed in shifted.keys() or key_pressed in unshifted.keys()
     released_key = key_released != 'None' and 'Key.shift' in key_released or key_released in shifted.keys() or key_released in unshifted.keys()
     return pressed_key or released_key
@@ -123,19 +123,20 @@ def parse_key_file(filepath):
         # Total time taken to type 10 words
         total_time_taken = rows[-1]['Time']
 
+    # Times between key releases
     release_latency = [released_times[i + 1] - released_times[i] for i in range(len(released_times) - 1)]
+    # Times between key presses
     press_latency = [pressed_times[i + 1] - pressed_times[i] for i in range(len(pressed_times) - 1)]
 
-    # Average/Max/Min hold times
-    avg_hold_time, max_hold_time, min_hold_time = statistics.mean(hold_times), max(hold_times), min(hold_times)
-    # Average/Max/Min consecutive press release times
-    avg_cpr_time, max_cpr_time, min_cpr_time = statistics.mean(cpr_times), max(cpr_times), min(cpr_times)
-    # Average/Max/Min release latency (upup) times
-    avg_released_time, max_released_time, min_released_time = statistics.mean(release_latency), max(
-        release_latency), min(release_latency)
-    # Average/Max/Min press latency (downdown) times
-    avg_press_time, max_press_time, min_press_time = statistics.mean(press_latency), max(press_latency), min(
-        press_latency)
+    # Average/Maximum/Minimum/Std.Dev. hold times
+    avg_hold_time, max_hold_time, min_hold_time, sd_hold_time = statistics.mean(hold_times), max(hold_times), min(hold_times), statistics.stdev(hold_times)
+    # Average/Maximum/Minimum/Std.Dev. consecutive press release times
+    avg_cpr_time, max_cpr_time, min_cpr_time, sd_cpr_time = statistics.mean(cpr_times), max(cpr_times), min(cpr_times), statistics.stdev(cpr_times)
+    # Average/Maximum/Minimum/Std.Dev. latency (upup) times
+    avg_released_time, max_released_time, min_released_time, sd_released_time = statistics.mean(release_latency), max(
+        release_latency), min(release_latency), statistics.stdev(release_latency)
+    # Average/Maximum/Minimum/Std.Dev. press latency (downdown) times
+    avg_press_time, max_press_time, min_press_time, sd_press_time = statistics.mean(press_latency), max(press_latency), min(press_latency), statistics.stdev(press_latency)
 
     # Values of the features that are written to new CSV
     feature_row = [total_time_taken, avg_hold_time, max_hold_time, min_hold_time, avg_cpr_time, max_cpr_time, min_cpr_time,
