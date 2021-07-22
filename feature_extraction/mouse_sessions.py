@@ -1,12 +1,11 @@
 import statistics
 
-from feature_extraction.actions import ActionType
+from feature_extraction.mouse_actions import ActionType
 
 
 class Session:
 
-    def __init__(self, filename, actions, usertype):
-        self.filename = filename
+    def __init__(self, actions, usertype):
         self.actions = actions
         self.usertype = usertype
 

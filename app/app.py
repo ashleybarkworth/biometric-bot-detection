@@ -115,7 +115,16 @@ class Keyboard(tk.Frame):
         self.error.pack(pady=(0, 5))
 
         tk.Label(self, text='123CAPabc!', bg=bg, font='Verdana 14 italic').pack(fill=tk.X)
-        tk.Text(self, height=10, width=40, padx=40, pady=40, highlightbackground=bg).pack(fill=tk.Y)
+        self.entry = tk.Text(self, height=10, width=40, padx=40, pady=40, highlightbackground=bg)
+        self.entry.pack(fill=tk.Y)
+
+        def test(e):
+            text = e.widget.get("1.0", "end-1c")
+            word_count = len(text.split())
+            if word_count > 10:
+                self.end()
+
+        self.entry.bind('<KeyRelease>', test)
 
         # Indicates whether key logger has started capturing
         self.capture_started = False

@@ -1,17 +1,11 @@
 import csv
 import os
 
-from feature_extraction.actions import ActionType, MouseEvent, MouseState, MouseAction
-from feature_extraction.sessions import Session
-
-data_directory = '../data/'
-mouse_folder = 'mouse/'
-events_folder = 'events/'
-actions_folder = 'actions/'
-sessions_folder = 'sessions/'
+from feature_extraction.mouse_actions import ActionType, MouseEvent, MouseState, MouseAction
+from feature_extraction.mouse_sessions import Session
 
 
-def interpolate_points(actions):
+def smooth_actions(actions):
     for i, action in enumerate(actions):
         action = actions[i]
         if i > 0:
@@ -26,7 +20,7 @@ def interpolate_points(actions):
     return actions[1:]
 
 
-def remove_point_drag_click(i, rows):
+def drag_between_point_click(i, rows):
     # Returns True if rows[i] is a 'Drag' event between a mouse press and release
     if 0 < i < len(rows) - 1:
         event_state = rows[i]['state']
@@ -37,21 +31,14 @@ def remove_point_drag_click(i, rows):
         return False
 
 
-def pre_process(rows):
-    new_rows = [row for i, row in enumerate(rows) if not remove_point_drag_click(i, rows)]
-    return new_rows
-
-
-def parse_actions_from_events(subdirectory, usertype, filename):
+def parse_mouse_file(filepath):
     mouse_events = []
     actions = []
-
-    filepath = os.path.join(subdirectory, filename)
 
     with open(filepath) as csv_file:
         csv_reader = csv.DictReader(csv_file)
         rows = list(csv_reader)
-        processed_rows = pre_process(rows)
+        processed_rows = [row for i, row in enumerate(rows) if not drag_between_point_click(i, rows)]
         prev_event = None
         for i, row in enumerate(processed_rows):
             time = row['time']
@@ -89,36 +76,21 @@ def parse_actions_from_events(subdirectory, usertype, filename):
 
             prev_event = mouse_event
 
-    if usertype == 'simplebot':
-        # pc_actions = [action for action in actions if action.action_type.value == ActionType.PC.value]
-        actions = interpolate_points(actions)
+    if 'simple' in filepath:
+        actions = smooth_actions(actions)
+
+    for action in actions:
+        action.calculate_features()
 
     return actions
 
 
-def write_action_csv_header(writer):
-    header = ['action_type', 'duration', 'direction', 'trajectory', 'distance', 'straightness', 'num_points',
-              'max_deviation', 'sum_of_angles', 'curvature', 'omega', 'vx', 'vy', 'v', 'a', 'j']
-    writer.writerow(header)
-
-
-def create_action_file(actions, folder, filename):
-    filepath = os.path.join(data_directory, mouse_folder, actions_folder, folder, filename)
-    with open(filepath, 'w') as file:
-        writer = csv.writer(file)
-        write_action_csv_header(writer)
-        for action in actions:
-            action_feature_row = action.calculate_features()
-            writer.writerow(action_feature_row)
-
-
-def create_session_file(session, folder, filename):
-    session_feature_row = session.calculate_features()
-    filepath = os.path.join(data_directory, mouse_folder, sessions_folder, folder, filename)
+def create_session_feature_file(features_directory, folder, feature_row):
+    filepath = os.path.join(features_directory, folder, 'mouse.csv')
     with open(filepath, 'w') as file:
         writer = csv.writer(file)
         write_session_csv_header(writer)
-        writer.writerow(session_feature_row)
+        writer.writerow(feature_row)
 
 
 def write_session_csv_header(writer):
@@ -161,16 +133,20 @@ def write_session_csv_header(writer):
     writer.writerow(header)
 
 
-def extract_mouse_features():
-    mouse_events_folder = os.path.join(data_directory, mouse_folder, events_folder)
-    for folder in os.listdir(mouse_events_folder):
-        # Ensure it's a directory
-        subdirectory = os.path.join(mouse_events_folder, folder)
-        if os.path.isdir(subdirectory):
-            # For each file in the user type folder
-            for file in os.listdir(subdirectory):
-                if not file.startswith('.'):
-                    actions = parse_actions_from_events(subdirectory, folder, file)
-                    create_action_file(actions, folder, file)
-                    session = Session(file, actions, folder)
-                    create_session_file(session, folder, file)
+def get_usertype(folder):
+    if 'human' in folder:
+        usertype = 'human'
+    elif 'simple' in folder:
+        usertype = 'simple'
+    else:
+        usertype = 'advanced'
+    return usertype
+
+
+def extract_mouse_features(events_directory, features_directory, folder):
+    mouse_filepath = os.path.join(events_directory, folder, 'mouse.csv')
+    actions = parse_mouse_file(mouse_filepath)
+    usertype = get_usertype(folder)
+    session = Session(actions, usertype)
+    session_feature_row = session.calculate_features()
+    create_session_feature_file(features_directory, folder, session_feature_row)

@@ -1,21 +1,24 @@
 import csv
+import errno
 import os.path
 import time
 from datetime import datetime
-from os.path import join
+import os
 
 from pynput import mouse
 from pynput import keyboard
 
 # Subdirectory folders to save mouse/keystroke data in
-data_directory = '../data/'
+data_folder = '../data/'
 key_folder = 'key/'
 mouse_folder = 'mouse/'
 events_folder = 'events/'
 
 
 # Time that app starts running (used in key and mouse file names)
-start_time = datetime.now().strftime('%Y%m%d-%H%M%S')
+start_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+
+global directory
 
 # Complete file paths for mouse/keystroke data
 key_filepath = ''
@@ -29,75 +32,41 @@ start_key_time = time.time()
 mouse_pressed = False
 
 # Key global variables
-p = []
-r = []
-count = 0
 keydata = 'a'
-kp_dict = {}
-d = []
-
-shifted = {
-    '1': '!',
-    '2': '@',
-}
 
 # Listeners
 global m_listen
 global k_listen
 
 
-def get_directory(data_type, user_type):
-    directory = ''
-    data_type_directory = key_folder if data_type == 'key' else mouse_folder
-
-    if user_type == 'simple':
-        directory = join(data_directory, data_type_directory, events_folder, 'simplebot/')
-    elif user_type == 'advanced':
-        directory = join(data_directory, data_type_directory, events_folder, 'advancedbot/')
-    elif user_type == 'human':
-        directory = join(data_directory, data_type_directory, events_folder, 'human/')
-
+def create_events_folder(user_type):
+    global directory
+    folder_name = ''.join([user_type, '-', start_time])
+    directory = os.path.join(data_folder, events_folder, folder_name)
+    try:
+        os.makedirs(directory)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise e
     return directory
 
 
-def get_key_data_filepath(user_type):
+def get_key_data_filepath():
     """
     Sets key_filepath to the complete file path of the key event data CSV file
-    :param user_type: human, simple, or advanced
     """
-    global key_filepath
-    filename = ''.join([start_time, '_', user_type, '.csv'])
-    directory = get_directory('key', user_type)
+    global key_filepath, directory
+    filename = 'key.csv'
     key_filepath = os.path.join(directory, filename)
 
 
-def get_mouse_data_filepath(user_type):
+def get_mouse_data_filepath():
     """
     Sets mouse_filepath to the complete file path of the mouse event data CSV file
-    :param user_type: human, simple, or advanced
     """
     global mouse_filepath
-    filename = ''.join([start_time, '_', user_type, '.csv'])
-    directory = get_directory('mouse', user_type)
+    filename = 'mouse.csv'
     mouse_filepath = os.path.join(directory, filename)
-
-
-# def write_key_row(keypressed, keyreleased, timestamp, Hold_time, press_release):
-#     with open(key_filepath, 'a') as f:
-#         csv_writer = csv.writer(f)
-#         csv_writer.writerow([keypressed, keyreleased, timestamp, Hold_time, press_release])
-
-
-def write_key_row(keypressed, keyreleased, timestamp):
-    with open(key_filepath, 'a') as f:
-        csv_writer = csv.writer(f)
-        csv_writer.writerow([keypressed, keyreleased, timestamp])
-
-
-def write_mouse_row(timestamp, x, y, button, state):
-    with open(mouse_filepath, 'a') as csv_file:
-        csv_writer = csv.writer(csv_file)
-        csv_writer.writerow([timestamp, x, y, button, state])
 
 
 def write_key_header():
@@ -110,6 +79,18 @@ def write_mouse_header():
     with open(mouse_filepath, 'x') as csv_file:
         csv_writer = csv.writer(csv_file)
         csv_writer.writerow(['time', 'mouse_x', 'mouse_y', 'button', 'state'])
+
+
+def write_key_row(timestamp, keypressed, keyreleased):
+    with open(key_filepath, 'a') as f:
+        csv_writer = csv.writer(f)
+        csv_writer.writerow([timestamp, keypressed, keyreleased])
+
+
+def write_mouse_row(timestamp, x, y, button, state):
+    with open(mouse_filepath, 'a') as csv_file:
+        csv_writer = csv.writer(csv_file)
+        csv_writer.writerow([timestamp, x, y, button, state])
 
 
 def on_press(key):
@@ -165,8 +146,9 @@ def start_key_logging(user_type):
     print('Recording keystrokes started')
     global start_key_time, k_listen
     start_key_time = time.time()
+    create_events_folder(user_type)
 
-    get_key_data_filepath(user_type)
+    get_key_data_filepath()
     write_key_header()
 
     k_listen = keyboard.Listener(on_press=on_press, on_release=on_release)
@@ -179,7 +161,7 @@ def start_mouse_logging(user_type):
 
     start_mouse_time = time.time()
 
-    get_mouse_data_filepath(user_type)
+    get_mouse_data_filepath()
     write_mouse_header()
 
     m_listen = mouse.Listener(on_move=on_move, on_click=on_click)

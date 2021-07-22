@@ -1,69 +1,43 @@
 import csv
 import os
-
-data_directory = '../data/'
-key_folder = 'key/'
-events_folder = 'events/'
-sessions_folder = 'sessions/'
-
-simplebot_folder = 'simplebot/'
-advancedbot_folder = 'advancedbot/'
-human_folder = 'human/'
+import statistics
 
 shifted = {'1': '!', '2': '@', '3': '#', 'a': 'A', 'b': 'B', 'c': 'C', 'p': 'P'}
-
 unshifted = dict([reversed(i) for i in shifted.items()])
 
 
-class bidict(dict):
-    def __init__(self, *args, **kwargs):
-        super(bidict, self).__init__(*args, **kwargs)
-        self.inverse = {}
-        for key, value in self.items():
-            self.inverse.setdefault(value, []).append(key)
+def create_key_feature_file(features_directory, folder, feature_row):
+    filepath = os.path.join(features_directory, folder, 'key.csv')
 
-    def __setitem__(self, key, value):
-        if key in self:
-            self.inverse[self[key]].remove(key)
-        super(bidict, self).__setitem__(key, value)
-        self.inverse.setdefault(value, []).append(key)
+    header = ['Total time taken', 'Average hold time', 'Max hold time', 'Min hold time', 'Average CPR time',
+              'Max CPR time', 'Min CPR time', 'Average Release Latency', 'Max Release Latency', 'Min Release Latency',
+              'Average Press Latency', 'Max Press Latency', 'Min Press Latency']
 
-    def __delitem__(self, key):
-        self.inverse.setdefault(self[key], []).remove(key)
-        if self[key] in self.inverse and not self.inverse[self[key]]:
-            del self.inverse[self[key]]
-        super(bidict, self).__delitem__(key)
-
-
-def write_new_key_header(writer):
-    header = ['Key pressed', 'Key released', 'Time', 'Hold Time', 'Consecutive Press Release']
-    writer.writerow(header)
-
-
-def create_new_key_file(rows, filepath):
     with open(filepath, 'w') as file:
         writer = csv.writer(file)
-        write_new_key_header(writer)
-        for row in rows:
-            writer.writerow(row)
+        writer.writerow(header)
+        writer.writerow(feature_row)
 
 
 def not_a_typo(key_pressed, key_released):
-    pressed_key = key_pressed != 'None' and 'Key.' in key_pressed or key_pressed in shifted.keys() or key_pressed in unshifted.keys()
-    released_key = key_released != 'None' and 'Key.' in key_released or key_released in shifted.keys() or key_released in unshifted.keys()
+    # This checks that for a specific event, either the key pressed contains an important character or the key released
+    # contains and important character. 'Important' characters must either be Key.shift or one of the characters in
+    # '123CAPabc!'.
+    pressed_key = key_pressed != 'None' and 'Key.shift' in key_pressed or key_pressed in shifted.keys() or key_pressed in unshifted.keys()
+    released_key = key_released != 'None' and 'Key.shift' in key_released or key_released in shifted.keys() or key_released in unshifted.keys()
     return pressed_key or released_key
 
 
-def parse_key_file(subdirectory, filename):
+def parse_key_file(filepath):
     key_pressed_dict = {}
     last_pressed_time = 0
-    # for up_up variable
-    last_released_time = 0
-    second_last_released_time = 0
-    new_rows = []
-    new_filename = 'new_mouse_data.csv'
     shift_is_pressed = False
-    filepath = os.path.join(subdirectory, filename)
+
+    total_time_taken = 0
+    hold_times = []
+    cpr_times = []
+    released_times = []
+    pressed_times = []
 
     with open(filepath) as csv_file:
         csv_reader = csv.DictReader(csv_file)
@@ -72,46 +46,56 @@ def parse_key_file(subdirectory, filename):
             row = rows[i]
             key_pressed = row['Key pressed']
             key_released = row['Key released'].replace("'", "")
-            time = row['Time']
+            time = float(row['Time'])
+
             hold_time = ''
             press_release = ''
-            # Key press event
+            released_key_time = ''
+            pressed_key_time = ''
+
+            # Character must either be Key.shift or one of the characters in '123CAPabc!'
             if not_a_typo(key_pressed, key_released):
-                if key_pressed != 'None' and 'Key.' in key_pressed or key_pressed in shifted.keys() or key_pressed in unshifted.keys():
-                    last_pressed_time = time
-                    key_pressed_dict[key_pressed] = float(time)
+                # Key press event
+                if key_pressed != 'None':
+                    # Ignore shift character for feature calculation, but set flag that caps is on
                     if key_pressed == 'Key.shift':
                         shift_is_pressed = True
+                    else:
+                        key_pressed_dict[key_pressed] = time
+                        last_pressed_time = time
+                        pressed_key_time = time
                 # Key Release event
                 elif key_released != 'None':
-                    check_for_key = key_released
-                    # Key released is uppercase or symbol
-                    if shift_is_pressed:
-                        # It was typed as uppercase
-                        if key_released in key_pressed_dict.keys():
-                            check_for_key = key_released
-                        # It was typed as lowercase
-                        else:
-                            check_for_key = unshifted[key_released]
-                    # Key released is lowercase or number
-                    else:
-                        # It was typed as lowercase
-                        if key_released in key_pressed_dict.keys():
-                            check_for_key = key_released
-                        # It was typed as uppercase
-                        else:
-                            check_for_key = shifted[key_released]
-
-                    # Check when this key was pressed
-                    press_time = key_pressed_dict[check_for_key]
-                    hold_time = float(time) - float(press_time)
-                    # Time between last press and current release
-                    press_release = float(time) - float(last_pressed_time)
-
+                    # Ignore shift character for feature calculation, but set flag that caps is off
                     if key_released == 'Key.shift':
                         shift_is_pressed = False
+                    else:
+                        check_for_key = key_released
+                        released_key_time = time
+                        # Key released is uppercase or symbol
+                        if shift_is_pressed:
+                            # It was typed as uppercase
+                            if key_released in key_pressed_dict.keys():
+                                check_for_key = key_released
+                            # It was typed as lowercase
+                            else:
+                                check_for_key = unshifted[key_released]
+                        # Key released is lowercase or number
+                        else:
+                            # It was typed as lowercase
+                            if key_released in key_pressed_dict.keys():
+                                check_for_key = key_released
+                            # It was typed as uppercase
+                            else:
+                                check_for_key = shifted[key_released]
 
-                    if 'Key.' not in key_released:
+                        # Check when this key was pressed
+                        press_time = key_pressed_dict[check_for_key]
+                        # Time between pressing this character and current release
+                        hold_time = time - press_time
+                        # Time between last press (any character) and current release
+                        press_release = time - last_pressed_time
+
                         if key_released in shifted.keys():
                             # Lowercase release: delete the uppercase entry
                             opposite_key = shifted[key_released]
@@ -121,24 +105,47 @@ def parse_key_file(subdirectory, filename):
                             opposite_key = unshifted[key_released]
                             key_pressed_dict.pop(opposite_key, None)
 
-                    # Delete entry from dictionary
-                    key_pressed_dict.pop(key_released, None)
+                        # Delete entry from dictionary
+                        key_pressed_dict.pop(key_released, None)
 
-                new_row = [key_pressed, key_released, time, hold_time, press_release]
-                new_rows.append(new_row)
+                if hold_time:
+                    hold_times.append(hold_time)
 
-    create_new_key_file(new_rows, filename)
+                if press_release:
+                    cpr_times.append(press_release)
+
+                if pressed_key_time:
+                    pressed_times.append(pressed_key_time)
+
+                if released_key_time:
+                    released_times.append(released_key_time)
+
+        # Total time taken to type 10 words
+        total_time_taken = rows[-1]['Time']
+
+    release_latency = [released_times[i + 1] - released_times[i] for i in range(len(released_times) - 1)]
+    press_latency = [pressed_times[i + 1] - pressed_times[i] for i in range(len(pressed_times) - 1)]
+
+    # Average/Max/Min hold times
+    avg_hold_time, max_hold_time, min_hold_time = statistics.mean(hold_times), max(hold_times), min(hold_times)
+    # Average/Max/Min consecutive press release times
+    avg_cpr_time, max_cpr_time, min_cpr_time = statistics.mean(cpr_times), max(cpr_times), min(cpr_times)
+    # Average/Max/Min release latency (upup) times
+    avg_released_time, max_released_time, min_released_time = statistics.mean(release_latency), max(
+        release_latency), min(release_latency)
+    # Average/Max/Min press latency (downdown) times
+    avg_press_time, max_press_time, min_press_time = statistics.mean(press_latency), max(press_latency), min(
+        press_latency)
+
+    # Values of the features that are written to new CSV
+    feature_row = [total_time_taken, avg_hold_time, max_hold_time, min_hold_time, avg_cpr_time, max_cpr_time, min_cpr_time,
+                   avg_released_time, max_released_time, min_released_time, avg_press_time, max_press_time, min_press_time]
+
+    return feature_row
 
 
-def extract_key_features():
-    key_events_folder = os.path.join(data_directory, key_folder, events_folder)
-    # For each of the user type folders (advancedBot, human, simpleBot)
-    for folder in os.listdir(key_events_folder):
-        # Ensure it's a directory
-        subdirectory = os.path.join(key_events_folder, folder)
-        if os.path.isdir(subdirectory):
-            # For each file in the user type folder
-            for file in os.listdir(subdirectory):
-                # Ensure it's a directory
-                if not file.startswith('.'):
-                    parse_key_file(subdirectory, file)
+def extract_key_features(events_directory, features_directory, folder):
+    key_filepath = os.path.join(events_directory, folder, 'key.csv')
+    feature_row = parse_key_file(key_filepath)
+    create_key_feature_file(features_directory, folder, feature_row)
+
