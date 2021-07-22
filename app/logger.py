@@ -158,7 +158,6 @@ def start_key_logging(user_type):
 def start_mouse_logging(user_type):
     print('Recording mouse started')
     global start_mouse_time, m_listen
-
     start_mouse_time = time.time()
 
     get_mouse_data_filepath()
