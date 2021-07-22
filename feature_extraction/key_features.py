@@ -139,8 +139,10 @@ def parse_key_file(filepath):
     avg_press_time, max_press_time, min_press_time, sd_press_time = statistics.mean(press_latency), max(press_latency), min(press_latency), statistics.stdev(press_latency)
 
     # Values of the features that are written to new CSV
-    feature_row = [total_time_taken, avg_hold_time, max_hold_time, min_hold_time, avg_cpr_time, max_cpr_time, min_cpr_time,
-                   avg_released_time, max_released_time, min_released_time, avg_press_time, max_press_time, min_press_time]
+    feature_row = [total_time_taken, avg_hold_time, max_hold_time, min_hold_time, sd_hold_time,
+                   avg_cpr_time, max_cpr_time, min_cpr_time, sd_cpr_time,
+                   avg_released_time, max_released_time, min_released_time, sd_released_time,
+                   avg_press_time, max_press_time, min_press_time, sd_press_time]
 
     return feature_row
 
