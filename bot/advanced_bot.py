@@ -49,7 +49,7 @@ def click_image(location):
         x, y = find_center(location)
         bezier_curve.moveTo(x, y)
         # Time between press and release
-        click_time = random.uniform(0.1, 0.2)
+        click_time = random.uniform(0.05, 0.1)
         pyautogui.mouseDown()
         time.sleep(click_time)
         pyautogui.mouseUp()
@@ -67,18 +67,23 @@ def play_sorting_game():
     fx, fy = find_center(find_image('fruits_box.png', False))
     ax, ay = find_center(find_image('animals_box.png', False))
 
+    tweens = [pyautogui.easeInOutCirc, pyautogui.easeInOutElastic, pyautogui.easeInOutBack, pyautogui.easeInOutBounce]
+
     for obj in objects:
         fruits = ['apple', 'orange', 'banana', 'strawberry']
         animals = ['beaver', 'cat', 'dog', 'monkey']
         img = ''.join([obj, '.png'])
         x, y = find_center(find_image(img, False))
         bezier_curve.moveTo(x, y)
-
-        duration = random.uniform(0.5, 1.5)
+        tween = random.choice(tweens)
+        print(tween)
+        duration = random.uniform(0.1, 1.0)
         if obj in fruits:
-            pyautogui.dragTo(fx, fy, duration=duration, button='left', tween=pyautogui.easeOutQuad)
+            pyautogui.dragTo(fx, fy, duration=duration, button='left', tween=tween)
+            # bezier_curve.dragTo(fx, fy)
         elif obj in animals:
-            pyautogui.dragTo(ax, ay, duration=duration, button='left', tween=pyautogui.easeOutQuad)
+            pyautogui.dragTo(ax, ay, duration=duration, button='left', tween=tween)
+            # bezier_curve.dragTo(ax, ay)
 
 
 def play_ball_game():
@@ -98,7 +103,7 @@ def type_words():
     times = 10
     text = '123CAPabc!'
     for i in range(times):
-        seconds = random.uniform(0.5, 2)
+        seconds = random.uniform(0.05, 0.55)
         pyautogui.typewrite(text, interval=seconds)
         # Enter new line after all but last word
         if i < times - 1:

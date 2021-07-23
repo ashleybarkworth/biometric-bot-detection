@@ -1,5 +1,7 @@
 import os
+import statistics
 
+from sklearn import neighbors, svm
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall_score, f1_score
 from sklearn.tree import DecisionTreeClassifier
@@ -57,16 +59,20 @@ def get_data_for_simple_bot():
 
 def print_results(results):
     # Print accuracy, precision, recall, and F1 score results from a classifier
-    # The mean() is there because cross validation evaluates on each 'split' of data, so the
-    # number of results is the same as the number of splits.
-    print('Accuracy: {:0.2f}%'.format(results['test_accuracy'].mean() * 100))
-    print('Precision: {:0.2f}%'.format(results['test_precision'].mean() * 100))
-    print('Recall: {:0.2f}%'.format(results['test_recall'].mean() * 100))
-    print('F1 score: {:0.2f}%'.format(results['test_f1_score'].mean() * 100))
-    print('\n')
+    accuracy = statistics.mean([result['test_accuracy'].mean() for result in results])
+    precision = statistics.mean([result['test_precision'].mean() for result in results])
+    recall = statistics.mean([result['test_recall'].mean() for result in results])
+    f1_score = statistics.mean([result['test_f1_score'].mean() for result in results])
+    print('--------------------')
+    print('Accuracy: {:0.2f}%'.format(accuracy * 100))
+    print('Precision: {:0.2f}%'.format(precision * 100))
+    print('Recall: {:0.2f}%'.format(recall * 100))
+    print('F1 score: {:0.2f}%'.format(f1_score * 100))
+    print('--------------------\n')
 
 
 def main():
+
     # This contains the human and simple bot data
     X_simple, y_simple = get_data_for_simple_bot()
 
@@ -77,12 +83,16 @@ def main():
     classifiers = []
 
     # Create the classifier algorithms (Random Forest/DT/SVM/KNN) here
-    rfc = RandomForestClassifier()
+    rfc = RandomForestClassifier(n_estimators=20)
     dt = DecisionTreeClassifier()
+    SVM = svm.SVC(kernel='linear')
+    knn = neighbors.KNeighborsClassifier(n_neighbors=3, weights='uniform')
 
     # Add the classifier to list here
     classifiers.append(rfc)
     classifiers.append(dt)
+    classifiers.append(SVM)
+    classifiers.append(knn)
 
     # These are the metrics for evaluating the classifiers
     scoring = {'accuracy': make_scorer(accuracy_score),
@@ -90,25 +100,32 @@ def main():
                'recall': make_scorer(recall_score, pos_label='bot'),
                'f1_score': make_scorer(f1_score, pos_label='bot')}
 
-    # This the cross validation performed to evaluate each of the classifiers.
-    cv = KFold(n_splits=2, shuffle=True)
+    # Number of times to repeat cross validation
+    repeats = 5
+    simple_results = []
+    advanced_results = []
 
     for clf in classifiers:
         print('Results for classifier: {}'.format(str(clf)))
-        print('=================================================\n')
+        print('===========================================================\n')
+
+        for i in range(repeats):
+            # This the cross validation performed to evaluate each of the classifiers.
+            cv = KFold(n_splits=3, shuffle=True)
+
+            simple_scores = cross_validate(clf, X_simple, y_simple, cv=cv, scoring=scoring)
+            simple_results.append(simple_scores)
+
+            advanced_scores = cross_validate(clf, X_advanced, y_advanced, cv=cv, scoring=scoring)
+            advanced_results.append(advanced_scores)
 
         # Simple bot results (human + simple data)
         print('Simple Bot Results')
-        print('------------------')
-        results = cross_validate(rfc, X_simple, y_simple, cv=cv, scoring=scoring)
-        print_results(results)
+        print_results(simple_results)
 
-        # This is commented out for now because there's not enough advanced bot data for this data.
         # Advanced bot results (human + advanced data)
-        # print('Advanced Bot Results')
-        # print('--------------------')
-        # results = cross_validate(rfc, X_advanced, y_advanced, cv=cv, scoring=scoring)
-        # print(results)
+        print('Advanced Bot Results')
+        print_results(advanced_results)
 
 
 if __name__ == '__main__':

@@ -20,6 +20,8 @@ def smooth_actions(actions):
     return actions[1:]
 
 
+
+
 def drag_between_point_click(i, rows):
     # Returns True if rows[i] is a 'Drag' event between a mouse press and release
     if 0 < i < len(rows) - 1:
@@ -78,6 +80,9 @@ def parse_mouse_file(filepath):
 
     if 'simple' in filepath:
         actions = smooth_actions(actions)
+
+    # Remove actions with less than 2 events
+    actions = [action for action in actions if len(action.events) >= 2]
 
     for action in actions:
         action.calculate_features()

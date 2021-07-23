@@ -16,7 +16,7 @@ def moveTo(x2, y2):
     y = np.linspace(y1, y2, num=cp, dtype='int')
 
     # Randomise inner points a bit (+-RAND at most).
-    RAND = 80
+    RAND = 65
     xr = [random.randint(-RAND, RAND) for k in range(cp)]
     yr = [random.randint(-RAND, RAND) for k in range(cp)]
     xr[0] = yr[0] = xr[-1] = yr[-1] = 0
