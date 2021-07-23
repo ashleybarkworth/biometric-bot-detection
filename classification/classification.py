@@ -3,13 +3,11 @@ import statistics
 
 from sklearn import neighbors, svm
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall_score, f1_score
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall_score, f1_score
 from sklearn.model_selection import cross_validate, KFold
 
 import pandas as pd
-
-global files
 
 features_directory = '../data/features/'
 
@@ -34,7 +32,6 @@ def get_data_from_folders(data_folders):
 
 
 def get_data_for_advanced_bot():
-    global files
     # Retrieve all folders from features directory. Each user's data is in a separate folder.
     folders = [f for f in os.listdir(features_directory) if os.path.isdir(os.path.join(features_directory, f))]
 
@@ -46,7 +43,6 @@ def get_data_for_advanced_bot():
 
 
 def get_data_for_simple_bot():
-    global files
     # Retrieve all folders from features directory. Each user's data is in a separate folder.
     folders = [f for f in os.listdir(features_directory) if os.path.isdir(os.path.join(features_directory, f))]
 
@@ -83,7 +79,7 @@ def main():
     classifiers = []
 
     # Create the classifier algorithms (Random Forest/DT/SVM/KNN) here
-    rfc = RandomForestClassifier(n_estimators=20)
+    rfc = RandomForestClassifier()
     dt = DecisionTreeClassifier()
     SVM = svm.SVC(kernel='linear')
     knn = neighbors.KNeighborsClassifier(n_neighbors=3, weights='uniform')
@@ -111,7 +107,7 @@ def main():
 
         for i in range(repeats):
             # This the cross validation performed to evaluate each of the classifiers.
-            cv = KFold(n_splits=3, shuffle=True)
+            cv = KFold(n_splits=2, shuffle=True)
 
             simple_scores = cross_validate(clf, X_simple, y_simple, cv=cv, scoring=scoring)
             simple_results.append(simple_scores)

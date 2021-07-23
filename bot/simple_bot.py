@@ -1,3 +1,4 @@
+import random
 import time
 
 import pyautogui
@@ -44,7 +45,6 @@ def click_image(location):
     :param location:  (left, top, width, height) coordinate of the image on the screen
     :return:nothing
     """
-    global speed
     if location is not None:
         x, y = find_center(location)
         pyautogui.moveTo(x, y)
@@ -58,7 +58,7 @@ def play_sorting_game():
     :return: nothing
     """
     objects = ['apple', 'banana', 'beaver', 'cat', 'dog', 'monkey', 'strawberry', 'orange']
-
+    random.shuffle(objects)  # sort objects in random order
     fx, fy = find_center(find_image('fruits_box.png', False))
     ax, ay = find_center(find_image('animals_box.png', False))
 
@@ -128,8 +128,9 @@ def main():
     # Play the ball clicking game
     play_ball_game()
     # Play the drag-and-drop sorting game
-    time.sleep(1)
     play_sorting_game()
+    time.sleep(5)
+    exit()
 
 
 if __name__ == '__main__':

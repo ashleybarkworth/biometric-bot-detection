@@ -66,8 +66,9 @@ def play_sorting_game():
     time.sleep(1.5)
     fx, fy = find_center(find_image('fruits_box.png', False))
     ax, ay = find_center(find_image('animals_box.png', False))
-
-    tweens = [pyautogui.easeInOutCirc, pyautogui.easeInOutElastic, pyautogui.easeInOutBack, pyautogui.easeInOutBounce]
+    box_width, box_height = 480, 255  # Dimensions of sorting boxes, used to place objects in random locations in boxes
+    padding = 60
+    tweens = [pyautogui.easeInOutBack, pyautogui.easeInOutBounce, pyautogui.easeInOutElastic]
 
     for obj in objects:
         fruits = ['apple', 'orange', 'banana', 'strawberry']
@@ -76,14 +77,15 @@ def play_sorting_game():
         x, y = find_center(find_image(img, False))
         bezier_curve.moveTo(x, y)
         tween = random.choice(tweens)
-        print(tween)
-        duration = random.uniform(0.1, 1.0)
+        duration = random.uniform(0.6, 2.0)
+
+        x_rand = random.randint(-box_width // 2 + padding, box_width // 2 - padding)
+        y_rand = random.randint(-box_height // 2 + padding, box_height // 2 - padding)
+
         if obj in fruits:
-            pyautogui.dragTo(fx, fy, duration=duration, button='left', tween=tween)
-            # bezier_curve.dragTo(fx, fy)
+            pyautogui.dragTo(fx + x_rand, fy + y_rand, duration=duration, button='left', tween=tween)
         elif obj in animals:
-            pyautogui.dragTo(ax, ay, duration=duration, button='left', tween=tween)
-            # bezier_curve.dragTo(ax, ay)
+            pyautogui.dragTo(ax + x_rand, ay + y_rand, duration=duration, button='left', tween=tween)
 
 
 def play_ball_game():
@@ -103,10 +105,17 @@ def type_words():
     times = 10
     text = '123CAPabc!'
     for i in range(times):
-        seconds = random.uniform(0.05, 0.55)
-        pyautogui.typewrite(text, interval=seconds)
+        for c in text:
+            # Random wait time between characters
+            seconds = random.uniform(0.01, 0.6)
+            pyautogui.keyDown(c)
+            time.sleep(seconds)
+            pyautogui.keyUp(c)
         # Enter new line after all but last word
         if i < times - 1:
+            # Random wait time after finishing word
+            seconds = random.uniform(0.5, 2.0)
+            time.sleep(seconds)
             pyautogui.press('enter')
 
 
@@ -140,6 +149,8 @@ def main():
     play_ball_game()
     # Play the drag-and-drop sorting game
     play_sorting_game()
+    time.sleep(5)
+    exit()
 
 
 if __name__ == '__main__':
