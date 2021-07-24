@@ -107,14 +107,14 @@ def type_words():
     for i in range(times):
         for c in text:
             # Random wait time between characters
-            seconds = random.uniform(0.01, 0.6)
+            seconds = random.uniform(0.03, 0.7)
             pyautogui.keyDown(c)
             time.sleep(seconds)
             pyautogui.keyUp(c)
         # Enter new line after all but last word
         if i < times - 1:
             # Random wait time after finishing word
-            seconds = random.uniform(0.5, 2.0)
+            seconds = random.uniform(0.5, 3.0)
             time.sleep(seconds)
             pyautogui.press('enter')
 

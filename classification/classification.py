@@ -107,7 +107,7 @@ def main():
 
         for i in range(repeats):
             # This the cross validation performed to evaluate each of the classifiers.
-            cv = KFold(n_splits=2, shuffle=True)
+            cv = KFold(n_splits=3, shuffle=True)
 
             simple_scores = cross_validate(clf, X_simple, y_simple, cv=cv, scoring=scoring)
             simple_results.append(simple_scores)

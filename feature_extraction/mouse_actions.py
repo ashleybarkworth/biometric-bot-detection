@@ -4,6 +4,7 @@ from enum import Enum
 from util.direction import get_bearings
 
 CURV_THRESHOLD = 0.0005
+DELTA = 0.001
 
 
 class ActionType(Enum):
@@ -66,6 +67,9 @@ class MouseAction:
             self.distance = math.sqrt((dx ** 2) + (dy ** 2))
             self.trajectory += self.distance
             path.append(self.trajectory)
+
+            if dt == 0:
+                dt = DELTA
 
             # Velocities
             vx_i = dx / dt
@@ -133,6 +137,8 @@ class MouseAction:
             prev_event = self.events[i - 1]
             dv = v[i] - v[i - 1]
             dt = curr_event.time - prev_event.time
+            if dt == 0:
+                dt = DELTA
             a_i = dv / dt
             a.append(a_i)
         self.a = 0 if len(a) < 1 else statistics.mean(a)
@@ -143,7 +149,10 @@ class MouseAction:
         for i in range(1, len(a)):
             curr_event = self.events[i]
             prev_event = self.events[i - 1]
-            j_i = a[i] - a[i - 1] / (curr_event.time - prev_event.time)
+            dt = curr_event.time - prev_event.time
+            if dt == 0:
+                dt = DELTA
+            j_i = a[i] - a[i - 1] / dt
             j.append(j_i)
         self.j = 0 if len(j) < 1 else statistics.mean(j)
 
@@ -154,6 +163,8 @@ class MouseAction:
             prev_event = self.events[i - 1]
             dtheta = theta[i] - theta[i - 1]
             dt = curr_event.time - prev_event.time
+            if dt == 0:
+                dt = DELTA
             omega_i = dtheta / dt
             omega.append(omega_i)
         self.omega = 0 if len(omega) < 1 else statistics.mean(omega)

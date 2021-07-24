@@ -48,7 +48,7 @@ class Session:
         self.dd_avg_angle_sum = self.dd_sd_angle_sum = self.dd_max_angle_sum = self.dd_min_angle_sum = 0
         self.dd_avg_max_deviation = self.dd_sd_max_deviation = self.dd_max_max_deviation = self.dd_min_max_deviation = 0
 
-    def calculate_features(self):
+    def calculate_features(self, action_type):
         mouse_move_actions = [action for action in self.actions if action.action_type.value == ActionType.MM.value]
         point_click_actions = [action for action in self.actions if action.action_type.value == ActionType.PC.value]
         drag_drop_actions = [action for action in self.actions if action.action_type.value == ActionType.DD.value]
@@ -67,35 +67,47 @@ class Session:
 
         self.avg_inter_action_time, self.sd_inter_action_time, self.max_inter_action_time, self.min_inter_action_time = mean_sd_max_min(inter_action_times)
 
-        row = [self.num_actions, self.total_duration,
-               self.mm_avg_v, self.mm_sd_v, self.mm_max_v, self.mm_min_v,
+        mm_row = [self.mm_avg_v, self.mm_sd_v, self.mm_max_v, self.mm_min_v,
                self.mm_avg_a, self.mm_sd_a, self.mm_max_a, self.mm_min_a,
                self.mm_avg_j, self.mm_sd_j, self.mm_max_j, self.mm_min_j,
                self.mm_avg_duration, self.mm_sd_duration, self.mm_max_duration, self.mm_min_duration,
                self.mm_avg_straightness, self.mm_sd_straightness, self.mm_max_straightness, self.mm_min_straightness,
-               # self.mm_avg_num_points, self.mm_sd_num_points, self.mm_max_num_points, self.mm_min_num_points,
+               self.mm_avg_num_points, self.mm_sd_num_points, self.mm_max_num_points, self.mm_min_num_points,
                self.mm_avg_curvature, self.mm_sd_curvature, self.mm_max_curvature, self.mm_min_curvature,
-               # self.mm_avg_angle_sum, self.mm_sd_angle_sum, self.mm_max_angle_sum, self.mm_min_angle_sum,
-               self.mm_avg_max_deviation, self.mm_sd_max_deviation, self.mm_max_max_deviation, self.mm_min_max_deviation,
-               self.pc_avg_v, self.pc_sd_v, self.pc_max_v, self.pc_min_v,
+               self.mm_avg_angle_sum, self.mm_sd_angle_sum, self.mm_max_angle_sum, self.mm_min_angle_sum,
+               self.mm_avg_max_deviation, self.mm_sd_max_deviation, self.mm_max_max_deviation, self.mm_min_max_deviation]
+
+        pc_row = [self.pc_avg_v, self.pc_sd_v, self.pc_max_v, self.pc_min_v,
                self.pc_avg_a, self.pc_sd_a, self.pc_max_a, self.pc_min_a,
                self.pc_avg_j, self.pc_sd_j, self.pc_max_j, self.pc_min_j,
                self.pc_avg_duration, self.pc_sd_duration, self.pc_max_duration, self.pc_min_duration,
                self.pc_avg_straightness, self.pc_sd_straightness, self.pc_max_straightness, self.pc_min_straightness,
-               # self.pc_avg_num_points, self.pc_sd_num_points, self.pc_max_num_points, self.pc_min_num_points,
+               self.pc_avg_num_points, self.pc_sd_num_points, self.pc_max_num_points, self.pc_min_num_points,
                self.pc_avg_curvature, self.pc_sd_curvature, self.pc_max_curvature, self.pc_min_curvature,
-               # self.pc_avg_angle_sum, self.pc_sd_angle_sum, self.pc_max_angle_sum, self.pc_min_angle_sum,
+               self.pc_avg_angle_sum, self.pc_sd_angle_sum, self.pc_max_angle_sum, self.pc_min_angle_sum,
                self.pc_avg_max_deviation, self.pc_sd_max_deviation, self.pc_max_max_deviation, self.pc_min_max_deviation,
-               self.pc_avg_click_time, self.pc_sd_click_time, self.pc_max_click_time, self.pc_min_click_time,
-               self.dd_avg_v, self.dd_sd_v, self.dd_max_v, self.dd_min_v,
+               self.pc_avg_click_time, self.pc_sd_click_time, self.pc_max_click_time, self.pc_min_click_time]
+
+        dd_row = [self.dd_avg_v, self.dd_sd_v, self.dd_max_v, self.dd_min_v,
                self.dd_avg_a, self.dd_sd_a, self.dd_max_a, self.dd_min_a,
                self.pc_avg_j, self.pc_sd_j, self.pc_max_j, self.pc_min_j,
                self.dd_avg_duration, self.dd_sd_duration, self.dd_max_duration, self.dd_min_duration,
                self.dd_avg_straightness, self.dd_sd_straightness, self.dd_max_straightness, self.dd_min_straightness,
-               # self.dd_avg_num_points, self.dd_sd_num_points, self.dd_max_num_points, self.dd_min_num_points,
+               self.dd_avg_num_points, self.dd_sd_num_points, self.dd_max_num_points, self.dd_min_num_points,
                self.dd_avg_curvature, self.dd_sd_curvature, self.dd_max_curvature, self.dd_min_curvature,
-               # self.dd_avg_angle_sum, self.dd_sd_angle_sum, self.dd_max_angle_sum, self.dd_min_angle_sum,
+               self.dd_avg_angle_sum, self.dd_sd_angle_sum, self.dd_max_angle_sum, self.dd_min_angle_sum,
                self.dd_avg_max_deviation, self.dd_sd_max_deviation, self.dd_max_max_deviation, self.dd_min_max_deviation]
+
+        row = [self.num_actions, self.total_duration]
+
+        if action_type == 'mm':
+            row += mm_row
+        elif action_type == 'pc':
+            row += pc_row
+        elif action_type == 'dd':
+            row += dd_row
+        else:
+            row += mm_row + pc_row + dd_row
 
         return row
 
