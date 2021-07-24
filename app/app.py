@@ -1,4 +1,5 @@
 import random
+import time
 from random import randint
 import tkinter as tk
 import logger
@@ -88,6 +89,7 @@ class Keyboard(tk.Frame):
 
     def end(self):
         if self.capture_started:
+            time.sleep(2)
             # Stop logging key data and switch to ball game
             logger.stop_key_logging()
             self.master.switch_canvas(BallGame)
@@ -321,6 +323,7 @@ class SortingGame(tk.Frame):
         self.correct_label['text'] = 'Correct: ' + str(self.correct)
 
         if self.correct == 8:
+            time.sleep(2)
             logger.stop_mouse_logging()
             self.master.switch_canvas(EndPage)
 

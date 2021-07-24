@@ -1,11 +1,14 @@
 import os
+import random
 import statistics
 
-from sklearn import neighbors, svm
+import numpy as np
+from sklearn import neighbors, svm, model_selection
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall_score, f1_score, roc_curve, auc
 from sklearn.model_selection import cross_validate, KFold
+import matplotlib.pyplot as plt
 
 import pandas as pd
 
@@ -23,7 +26,7 @@ def get_data_from_folders(data_folders):
         # Combine key and mouse features from the user into one row
         merged_data = pd.concat([key_data, mouse_data], axis=1)
         # Determine classification of user from folder name and add to classifications
-        classification = 'human' if 'human' in folder else 'bot'
+        classification = 0 if 'human' in folder else 1
         classifications.append(classification)
         # Merge feature row with existing data set
         data = merged_data if data is None else pd.concat([data, merged_data], ignore_index=True)
@@ -51,6 +54,44 @@ def get_data_for_simple_bot():
 
     data_folders = human_folders + simple_bot_folders
     return get_data_from_folders(data_folders)
+
+
+def draw_auc_curve(classifiers, X, y, type):
+    # Split data set into 60% for training and 40% for testing
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(X, np.ravel(y),
+                                                                        test_size=0.5,
+                                                                        shuffle=True)
+
+    classifier_names = ['Random Forest', 'Decision Tree', 'SVM', 'K-Nearest Neighbor']
+
+    # Loop through 4 classifiers (Random Forest/DT/SVM/KNN) and plot on the same figure
+    for i, classifier in enumerate(classifiers):
+        # For some reason only SVM needs this to be set to use predict_proba()
+        if isinstance(classifier, svm.SVC):
+            classifier.probability = True
+        # Train classifier
+        classifier.fit(X_train, y_train)
+        # Get probabilities for test data
+        y_predict_proba = classifier.predict_proba(X_test)
+        probabilities = y_predict_proba[:, 1]
+        # Obtain TPR/FPR
+        fpr, tpr, _ = roc_curve(y_test, probabilities, pos_label=1)
+        roc_auc = auc(fpr, tpr)
+        color = ['lightblue', 'magenta', 'yellow', 'lime']
+        # Plot TPR/FPR curve for the classifier
+        plt.plot(fpr, tpr, color=color[i], lw=1, label=classifier_names[i] + ' (AUC = {:0.2f})'.format(roc_auc))
+
+    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+    plt.xlim([-0.05, 1.05])
+    plt.ylim([-0.05, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC Curve (' + type + ')')
+    plt.legend(loc="lower right")
+
+    image_name = type + '_auc' + '.png'
+    plt.savefig(image_name)
+    plt.show()
 
 
 def print_results(results):
@@ -92,9 +133,9 @@ def main():
 
     # These are the metrics for evaluating the classifiers
     scoring = {'accuracy': make_scorer(accuracy_score),
-               'precision': make_scorer(precision_score, pos_label='bot'),
-               'recall': make_scorer(recall_score, pos_label='bot'),
-               'f1_score': make_scorer(f1_score, pos_label='bot')}
+               'precision': make_scorer(precision_score, pos_label=1),
+               'recall': make_scorer(recall_score, pos_label=1),
+               'f1_score': make_scorer(f1_score, pos_label=1)}
 
     # Number of times to repeat cross validation
     repeats = 5
@@ -107,7 +148,7 @@ def main():
 
         for i in range(repeats):
             # This the cross validation performed to evaluate each of the classifiers.
-            cv = KFold(n_splits=3, shuffle=True)
+            cv = KFold(n_splits=2, shuffle=True)
 
             simple_scores = cross_validate(clf, X_simple, y_simple, cv=cv, scoring=scoring)
             simple_results.append(simple_scores)
@@ -122,6 +163,9 @@ def main():
         # Advanced bot results (human + advanced data)
         print('Advanced Bot Results')
         print_results(advanced_results)
+
+    draw_auc_curve(classifiers, X_simple, y_simple, 'Simple')
+    draw_auc_curve(classifiers, X_advanced, y_advanced, 'Advanced')
 
 
 if __name__ == '__main__':

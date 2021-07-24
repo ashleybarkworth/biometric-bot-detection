@@ -121,7 +121,7 @@ def parse_key_file(filepath):
                     released_times.append(released_key_time)
 
         # Total time taken to type 10 words
-        total_time_taken = rows[-1]['Time']
+        total_time_taken = float(rows[-1]['Time']) - float(rows[0]['Time'])
 
     # Times between key releases
     release_latency = [released_times[i + 1] - released_times[i] for i in range(len(released_times) - 1)]
