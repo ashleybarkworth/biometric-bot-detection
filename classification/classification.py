@@ -1,23 +1,50 @@
 import os
-import random
 import statistics
 
 import numpy as np
-from sklearn import neighbors, svm, model_selection
+from sklearn import neighbors, svm
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall_score, f1_score, roc_curve, auc
-from sklearn.model_selection import cross_validate, KFold
-import matplotlib.pyplot as plt
+from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall_score, f1_score
+from sklearn.model_selection import cross_validate, StratifiedKFold
 
 import pandas as pd
 
 features_directory = '../data/features/'
 
 
+def add_noise(data):
+    # Get random 10% of data to add noise to
+    part_10 = data.sample(frac=0.1)
+    # Get the remaining 90% of data
+    rest_part_10 = data.drop(part_10.index)
+
+    # Get all columns from the 10% data set (except for the class label) so noise can be added to each value
+    clean_signal = part_10.drop('class', axis=1)
+    # Get the class labels (to add back in after adding noise)
+    classes = part_10['class']
+
+    # Get [row, column] dimensions of the 10% features data set (needed for adding random noise to each value)
+    shape = clean_signal.shape
+    # Mean, standard deviation of Gaussian (i.e. normal) distribution
+    mu, sigma = 0, np.std(data)[:-1] * 5
+
+    # Generate random noise from Gaussian distribution (generates random noise for each value)
+    noise = np.random.normal(mu, sigma, [shape[0], shape[1]])
+    # Add random noise to the 10% data set
+    signal = clean_signal.add(noise)
+    # Add 'class' column back to array
+    signal['class'] = classes
+
+    # Recombine 10% and 90% data sets
+    noisy_data = pd.concat([signal, rest_part_10], ignore_index=True)
+    return noisy_data
+
+
 def get_data_from_folders(data_folders):
     data = None
-    classifications = []
 
     for folder in data_folders:
         # Retrieve key and mouse features for a single user
@@ -27,11 +54,18 @@ def get_data_from_folders(data_folders):
         merged_data = pd.concat([key_data, mouse_data], axis=1)
         # Determine classification of user from folder name and add to classifications
         classification = 0 if 'human' in folder else 1
-        classifications.append(classification)
+        # Add classification as a new column to the feature row
+        merged_data['class'] = classification
         # Merge feature row with existing data set
         data = merged_data if data is None else pd.concat([data, merged_data], ignore_index=True)
 
-    return data, classifications
+    # data['class'] = classifications
+    noisy_data = add_noise(data)
+
+    classifications = noisy_data['class']
+    noisy_data = noisy_data.drop('class', axis=1)
+
+    return noisy_data, classifications
 
 
 def get_data_for_advanced_bot():
@@ -56,60 +90,29 @@ def get_data_for_simple_bot():
     return get_data_from_folders(data_folders)
 
 
-def draw_auc_curve(classifiers, X, y, type):
-    # Split data set into 60% for training and 40% for testing
-    X_train, X_test, y_train, y_test = model_selection.train_test_split(X, np.ravel(y),
-                                                                        test_size=0.5,
-                                                                        shuffle=True)
-
-    classifier_names = ['Random Forest', 'Decision Tree', 'SVM', 'K-Nearest Neighbor']
-
-    # Loop through 4 classifiers (Random Forest/DT/SVM/KNN) and plot on the same figure
-    for i, classifier in enumerate(classifiers):
-        # For some reason only SVM needs this to be set to use predict_proba()
-        if isinstance(classifier, svm.SVC):
-            classifier.probability = True
-        # Train classifier
-        classifier.fit(X_train, y_train)
-        # Get probabilities for test data
-        y_predict_proba = classifier.predict_proba(X_test)
-        probabilities = y_predict_proba[:, 1]
-        # Obtain TPR/FPR
-        fpr, tpr, _ = roc_curve(y_test, probabilities, pos_label=1)
-        roc_auc = auc(fpr, tpr)
-        color = ['lightblue', 'magenta', 'yellow', 'lime']
-        # Plot TPR/FPR curve for the classifier
-        plt.plot(fpr, tpr, color=color[i], lw=1, label=classifier_names[i] + ' (AUC = {:0.2f})'.format(roc_auc))
-
-    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
-    plt.xlim([-0.05, 1.05])
-    plt.ylim([-0.05, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('ROC Curve (' + type + ')')
-    plt.legend(loc="lower right")
-
-    image_name = type + '_auc' + '.png'
-    plt.savefig(image_name)
-    plt.show()
-
-
 def print_results(results):
     # Print accuracy, precision, recall, and F1 score results from a classifier
-    accuracy = statistics.mean([result['test_accuracy'].mean() for result in results])
-    precision = statistics.mean([result['test_precision'].mean() for result in results])
-    recall = statistics.mean([result['test_recall'].mean() for result in results])
-    f1_score = statistics.mean([result['test_f1_score'].mean() for result in results])
+    accuracy_avg = statistics.mean([result['test_accuracy'].mean() for result in results])
+    accuracy_sd = statistics.stdev([result['test_accuracy'].mean() for result in results])
+
+    precision_avg = statistics.mean([result['test_precision'].mean() for result in results])
+    precision_sd = statistics.stdev([result['test_precision'].mean() for result in results])
+
+    recall_avg = statistics.mean([result['test_recall'].mean() for result in results])
+    recall_sd = statistics.stdev([result['test_recall'].mean() for result in results])
+
+    f1_score_avg = statistics.mean([result['test_f1_score'].mean() for result in results])
+    f1_score_sd = statistics.stdev([result['test_f1_score'].mean() for result in results])
+
     print('--------------------')
-    print('Accuracy: {:0.2f}%'.format(accuracy * 100))
-    print('Precision: {:0.2f}%'.format(precision * 100))
-    print('Recall: {:0.2f}%'.format(recall * 100))
-    print('F1 score: {:0.2f}%'.format(f1_score * 100))
+    print('Accuracy: {:0.2f}% \u00B1 {:0.2f}%'.format(accuracy_avg * 100, accuracy_sd * 100))
+    print('Precision: {:0.2f}% \u00B1 {:0.2f}%'.format(precision_avg * 100, precision_sd * 100))
+    print('Recall: {:0.2f}% \u00B1 {:0.2f}%'.format(recall_avg * 100, recall_sd * 100))
+    print('F1 score: {:0.2f}% \u00B1 {:0.2f}%'.format(f1_score_avg * 100, f1_score_sd * 100))
     print('--------------------\n')
 
 
 def main():
-
     # This contains the human and simple bot data
     X_simple, y_simple = get_data_for_simple_bot()
 
@@ -120,7 +123,7 @@ def main():
     classifiers = []
 
     # Create the classifier algorithms (Random Forest/DT/SVM/KNN) here
-    rfc = RandomForestClassifier()
+    rfc = RandomForestClassifier(n_estimators=150)
     dt = DecisionTreeClassifier()
     SVM = svm.SVC(kernel='linear')
     knn = neighbors.KNeighborsClassifier(n_neighbors=3, weights='uniform')
@@ -138,7 +141,8 @@ def main():
                'f1_score': make_scorer(f1_score, pos_label=1)}
 
     # Number of times to repeat cross validation
-    repeats = 5
+    repeats = 10
+    # Stores results. There should be (repeats * n_splits) results after repeated cross validation completes
     simple_results = []
     advanced_results = []
 
@@ -147,10 +151,13 @@ def main():
         print('===========================================================\n')
 
         for i in range(repeats):
-            # This the cross validation performed to evaluate each of the classifiers.
-            cv = KFold(n_splits=2, shuffle=True)
+            scalar = StandardScaler()
+            pipeline = Pipeline([('transformer', scalar), ('estimator', clf)])
 
-            simple_scores = cross_validate(clf, X_simple, y_simple, cv=cv, scoring=scoring)
+            # Stratified k-fold cross validation with k=3
+            cv = StratifiedKFold(n_splits=3, shuffle=True)
+
+            simple_scores = cross_validate(pipeline, X_simple, y_simple, cv=cv, scoring=scoring)
             simple_results.append(simple_scores)
 
             advanced_scores = cross_validate(clf, X_advanced, y_advanced, cv=cv, scoring=scoring)
@@ -163,9 +170,6 @@ def main():
         # Advanced bot results (human + advanced data)
         print('Advanced Bot Results')
         print_results(advanced_results)
-
-    draw_auc_curve(classifiers, X_simple, y_simple, 'Simple')
-    draw_auc_curve(classifiers, X_advanced, y_advanced, 'Advanced')
 
 
 if __name__ == '__main__':

@@ -1,0 +1,76 @@
+Results for classifier: RandomForestClassifier(n_estimators=150)
+===========================================================
+
+Simple Bot Results
+--------------------
+Accuracy: 98.46% ± 1.30%
+Precision: 97.60% ± 2.76%
+Recall: 97.67% ± 2.74%
+F1 score: 97.52% ± 2.08%
+--------------------
+
+Advanced Bot Results
+--------------------
+Accuracy: 96.95% ± 0.68%
+Precision: 97.79% ± 1.53%
+Recall: 92.33% ± 2.25%
+F1 score: 94.76% ± 1.18%
+--------------------
+
+Results for classifier: DecisionTreeClassifier()
+===========================================================
+
+Simple Bot Results
+--------------------
+Accuracy: 96.94% ± 2.22%
+Precision: 94.15% ± 4.76%
+Recall: 96.67% ± 2.65%
+F1 score: 95.21% ± 3.41%
+--------------------
+
+Advanced Bot Results
+--------------------
+Accuracy: 96.17% ± 1.37%
+Precision: 95.80% ± 3.60%
+Recall: 92.17% ± 2.48%
+F1 score: 93.65% ± 2.08%
+--------------------
+
+Results for classifier: SVC(kernel='linear')
+===========================================================
+
+Simple Bot Results
+--------------------
+Accuracy: 97.96% ± 2.32%
+Precision: 96.10% ± 4.77%
+Recall: 97.78% ± 2.67%
+F1 score: 96.80% ± 3.59%
+--------------------
+
+Advanced Bot Results
+--------------------
+Accuracy: 95.31% ± 1.81%
+Precision: 93.47% ± 4.67%
+Recall: 91.78% ± 2.43%
+F1 score: 92.30% ± 2.83%
+--------------------
+
+Results for classifier: KNeighborsClassifier(n_neighbors=3)
+===========================================================
+
+Simple Bot Results
+--------------------
+Accuracy: 98.47% ± 2.19%
+Precision: 97.07% ± 4.45%
+Recall: 98.33% ± 2.50%
+F1 score: 97.60% ± 3.40%
+--------------------
+
+Advanced Bot Results
+--------------------
+Accuracy: 94.72% ± 1.95%
+Precision: 92.54% ± 4.53%
+Recall: 90.83% ± 2.80%
+F1 score: 91.31% ± 3.12%
+--------------------
+

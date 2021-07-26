@@ -5,16 +5,14 @@ from feature_extraction.mouse_actions import ActionType, MouseEvent, MouseState,
 from feature_extraction.mouse_sessions import Session
 
 
-def smooth_actions(actions):
+def smooth_bot_actions(actions):
     for i, action in enumerate(actions):
         action = actions[i]
         if i > 0:
             prev_action_event = actions[i - 1].events[-1]
-            last_x, last_y = prev_action_event.x, prev_action_event.y
+            last_x, last_y, last_time = prev_action_event.x, prev_action_event.y, prev_action_event.time
             index = 0 if action.action_type.value == ActionType.MM.value else -4
             action.events[index].x, action.events[index].y = last_x, last_y
-            if action.action_type.value != ActionType.MM.value:
-                del action.events[-3]
 
     # Remove the first action that clicks 'Start' button (no movement recorded)
     return actions[1:]
@@ -76,8 +74,8 @@ def parse_mouse_file(filepath):
 
             prev_event = mouse_event
 
-    if 'simple' in filepath:
-        actions = smooth_actions(actions)
+    if 'simple' in filepath or 'advanced' in filepath:
+        actions = smooth_bot_actions(actions)
 
     # Remove actions with less than 2 events
     actions = [action for action in actions if len(action.events) >= 2]
@@ -102,9 +100,9 @@ def write_session_csv_header(writer, action_type):
                  'mm_avg_j', 'mm_sd_j', 'mm_max_j', 'mm_min_j',
                  'mm_avg_duration', 'mm_sd_duration', 'mm_max_duration', 'mm_min_duration',
                  'mm_avg_straightness', 'mm_sd_straightness', 'mm_max_straightness', 'mm_min_straightness',
-                 # 'mm_avg_num_points', 'mm_sd_num_points', 'mm_max_num_points', 'mm_min_num_points',
+                 'mm_avg_num_points', 'mm_sd_num_points', 'mm_max_num_points', 'mm_min_num_points',
                  'mm_avg_curvature', 'mm_sd_curvature', 'mm_max_curvature', 'mm_min_curvature',
-                 # 'mm_avg_angle_sum', 'mm_sd_angle_sum', 'mm_max_angle_sum', 'mm_min_angle_sum',
+                 'mm_avg_angle_sum', 'mm_sd_angle_sum', 'mm_max_angle_sum', 'mm_min_angle_sum',
                  'mm_avg_max_deviation', 'mm_sd_max_deviation', 'mm_max_max_deviation', 'mm_min_max_deviation']
 
     pc_header = ['pc_avg_v', 'pc_sd_v', 'pc_max_v', 'pc_min_v',
@@ -112,9 +110,9 @@ def write_session_csv_header(writer, action_type):
                  'pc_avg_j', 'pc_sd_j', 'pc_max_j', 'pc_min_j',
                  'pc_avg_duration', 'pc_sd_duration', 'pc_max_duration', 'pc_min_duration',
                  'pc_avg_straightness', 'pc_sd_straightness', 'pc_max_straightness', 'pc_min_straightness',
-                 # 'pc_avg_num_points', 'pc_sd_num_points', 'pc_max_num_points', 'pc_min_num_points',
+                 'pc_avg_num_points', 'pc_sd_num_points', 'pc_max_num_points', 'pc_min_num_points',
                  'pc_avg_curvature', 'pc_sd_curvature', 'pc_max_curvature', 'pc_min_curvature',
-                 # 'pc_avg_angle_sum', 'pc_sd_angle_sum', 'pc_max_angle_sum', 'pc_min_angle_sum',
+                 'pc_avg_angle_sum', 'pc_sd_angle_sum', 'pc_max_angle_sum', 'pc_min_angle_sum',
                  'pc_avg_max_deviation', 'pc_sd_max_deviation', 'pc_max_max_deviation', 'pc_min_max_deviation',
                  'pc_avg_click_time', 'pc_sd_click_time', 'pc_max_click_time', 'pc_min_click_time']
 
@@ -123,9 +121,9 @@ def write_session_csv_header(writer, action_type):
                  'dd_avg_j', 'dd_sd_j', 'pc_max_j', 'pc_min_j',
                  'dd_avg_duration', 'dd_sd_duration', 'dd_max_duration', 'dd_min_duration',
                  'dd_avg_straightness', 'dd_sd_straightness', 'dd_max_straightness', 'dd_min_straightness',
-                 # 'dd_avg_num_points', 'dd_sd_num_points', 'dd_max_num_points', 'dd_min_num_points',
+                 'dd_avg_num_points', 'dd_sd_num_points', 'dd_max_num_points', 'dd_min_num_points',
                  'dd_avg_curvature', 'dd_sd_curvature', 'dd_max_curvature', 'dd_min_curvature',
-                 # 'dd_avg_angle_sum', 'dd_sd_angle_sum', 'dd_max_angle_sum', 'dd_min_angle_sum',
+                 'dd_avg_angle_sum', 'dd_sd_angle_sum', 'dd_max_angle_sum', 'dd_min_angle_sum',
                  'dd_avg_max_deviation', 'dd_sd_max_deviation', 'dd_max_max_deviation', 'dd_min_max_deviation']
 
     header = ['num_actions', 'total_duration']
