@@ -12,7 +12,6 @@ class Session:
         # Session features
         self.num_actions = len(actions)
         self.total_duration = actions[-1].events[-1].time - actions[0].events[0].time
-        self.avg_inter_action_time = self.sd_inter_action_time = self.max_inter_action_time = self.min_inter_action_time = 0
 
         # Mouse Move Action Features
         self.mm_avg_v = self.mm_sd_v = self.mm_max_v = self.mm_min_v = 0
@@ -56,16 +55,6 @@ class Session:
         self.process_mouse_move_actions(mouse_move_actions)
         self.process_point_click_actions(point_click_actions)
         self.process_drag_drop_actions(drag_drop_actions)
-
-        # Times between consecutive actions
-        inter_action_times = []
-        for i in range(1, len(self.actions)):
-            action_start_time = self.actions[i].events[0].time
-            num_prev_action_events = len(self.actions[i - 1].events)
-            prev_action_end_time = self.actions[i - 1].events[num_prev_action_events - 1].time
-            inter_action_times.append(action_start_time - prev_action_end_time)
-
-        self.avg_inter_action_time, self.sd_inter_action_time, self.max_inter_action_time, self.min_inter_action_time = mean_sd_max_min(inter_action_times)
 
         mm_row = [self.mm_avg_v, self.mm_sd_v, self.mm_max_v, self.mm_min_v,
                self.mm_avg_a, self.mm_sd_a, self.mm_max_a, self.mm_min_a,

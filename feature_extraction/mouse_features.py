@@ -60,8 +60,7 @@ def parse_mouse_file(filepath):
                     mouse_events = []
             elif mouse_event.state == MouseState.PRESSED:
                 next_event = processed_rows[i + 1]
-                # Check if next event is a mouse drag, in which case create Mouse Move action
-                # and start_time new Drag and Drop action
+                # Check if next event is a mouse drag, in which case create Mouse Move action and start new Drag and Drop action
                 if MouseState(next_event['state']) == MouseState.DRAGGED:
                     if len(mouse_events) > 0:
                         actions.append(MouseAction(ActionType.MM, mouse_events))

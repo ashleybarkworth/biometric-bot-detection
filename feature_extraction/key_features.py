@@ -132,10 +132,9 @@ def parse_key_file(filepath):
     avg_hold_time, max_hold_time, min_hold_time, sd_hold_time = statistics.mean(hold_times), max(hold_times), min(hold_times), statistics.stdev(hold_times)
     # Average/Maximum/Minimum/Std.Dev. consecutive press release times
     avg_cpr_time, max_cpr_time, min_cpr_time, sd_cpr_time = statistics.mean(cpr_times), max(cpr_times), min(cpr_times), statistics.stdev(cpr_times)
-    # Average/Maximum/Minimum/Std.Dev. latency (upup) times
-    avg_released_time, max_released_time, min_released_time, sd_released_time = statistics.mean(release_latency), max(
-        release_latency), min(release_latency), statistics.stdev(release_latency)
-    # Average/Maximum/Minimum/Std.Dev. press latency (downdown) times
+    # Average/Maximum/Minimum/Std.Dev. release latency times
+    avg_released_time, max_released_time, min_released_time, sd_released_time = statistics.mean(release_latency), max(release_latency), min(release_latency), statistics.stdev(release_latency)
+    # Average/Maximum/Minimum/Std.Dev. press latency times
     avg_press_time, max_press_time, min_press_time, sd_press_time = statistics.mean(press_latency), max(press_latency), min(press_latency), statistics.stdev(press_latency)
 
     # Values of the features that are written to new CSV

@@ -3,18 +3,18 @@ Results for classifier: RandomForestClassifier(n_estimators=150)
 
 Simple Bot Results
 --------------------
-Accuracy: 98.46% ± 1.30%
-Precision: 97.60% ± 2.76%
-Recall: 97.67% ± 2.74%
-F1 score: 97.52% ± 2.08%
+Accuracy: 96.89% ± 4.68%
+Precision: 97.14% ± 6.39%
+Recall: 93.33% ± 14.91%
+F1 score: 94.46% ± 8.74%
 --------------------
 
 Advanced Bot Results
 --------------------
-Accuracy: 96.95% ± 0.68%
-Precision: 97.79% ± 1.53%
-Recall: 92.33% ± 2.25%
-F1 score: 94.76% ± 1.18%
+Accuracy: 96.95% ± 4.50%
+Precision: 96.67% ± 7.45%
+Recall: 93.33% ± 9.13%
+F1 score: 94.85% ± 7.55%
 --------------------
 
 Results for classifier: DecisionTreeClassifier()
@@ -22,18 +22,18 @@ Results for classifier: DecisionTreeClassifier()
 
 Simple Bot Results
 --------------------
-Accuracy: 96.94% ± 2.22%
-Precision: 94.15% ± 4.76%
-Recall: 96.67% ± 2.65%
-F1 score: 95.21% ± 3.41%
+Accuracy: 95.84% ± 6.85%
+Precision: 94.29% ± 12.78%
+Recall: 93.33% ± 9.13%
+F1 score: 93.57% ± 10.10%
 --------------------
 
 Advanced Bot Results
 --------------------
-Accuracy: 96.17% ± 1.37%
-Precision: 95.80% ± 3.60%
-Recall: 92.17% ± 2.48%
-F1 score: 93.65% ± 2.08%
+Accuracy: 92.00% ± 15.25%
+Precision: 88.57% ± 25.56%
+Recall: 86.67% ± 21.73%
+F1 score: 87.41% ± 23.40%
 --------------------
 
 Results for classifier: SVC(kernel='linear')
@@ -41,18 +41,18 @@ Results for classifier: SVC(kernel='linear')
 
 Simple Bot Results
 --------------------
-Accuracy: 97.96% ± 2.32%
-Precision: 96.10% ± 4.77%
-Recall: 97.78% ± 2.67%
-F1 score: 96.80% ± 3.59%
+Accuracy: 96.89% ± 2.84%
+Precision: 94.29% ± 7.82%
+Recall: 96.67% ± 7.45%
+F1 score: 95.10% ± 4.50%
 --------------------
 
 Advanced Bot Results
 --------------------
-Accuracy: 95.31% ± 1.81%
-Precision: 93.47% ± 4.67%
-Recall: 91.78% ± 2.43%
-F1 score: 92.30% ± 2.83%
+Accuracy: 94.89% ± 3.54%
+Precision: 90.95% ± 8.32%
+Recall: 93.33% ± 9.13%
+F1 score: 91.77% ± 5.92%
 --------------------
 
 Results for classifier: KNeighborsClassifier(n_neighbors=3)
@@ -60,17 +60,17 @@ Results for classifier: KNeighborsClassifier(n_neighbors=3)
 
 Simple Bot Results
 --------------------
-Accuracy: 98.47% ± 2.19%
-Precision: 97.07% ± 4.45%
-Recall: 98.33% ± 2.50%
-F1 score: 97.60% ± 3.40%
+Accuracy: 96.95% ± 4.50%
+Precision: 96.67% ± 7.45%
+Recall: 93.33% ± 9.13%
+F1 score: 94.85% ± 7.55%
 --------------------
 
 Advanced Bot Results
 --------------------
-Accuracy: 94.72% ± 1.95%
-Precision: 92.54% ± 4.53%
-Recall: 90.83% ± 2.80%
-F1 score: 91.31% ± 3.12%
+Accuracy: 94.84% ± 3.72%
+Precision: 94.29% ± 7.82%
+Recall: 90.00% ± 14.91%
+F1 score: 91.10% ± 7.17%
 --------------------
 
