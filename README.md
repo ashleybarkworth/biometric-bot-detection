@@ -4,12 +4,14 @@ ___
 
 <table>
   <tr>
-    <td><img src="screenshots/type.png" width=540 height=423></td>
-    <td><img src="screenshots/ball.png" width=540 height=423></td>
+    <td><img src="screenshots/type.png" width=540 height=400></td>
+    <td><img src="screenshots/ball.png" width=540 height=400></td>
   </tr>
  </table>
 
-<img src="screenshots/sort.png" width=792 height=559>
+<p align="center">
+  <img src="screenshots/sort.png" width=642 height=453>
+</p>
 
 ---
 
