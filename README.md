@@ -2,8 +2,14 @@
 
 ___
 
-<img src="screenshots/type.png" width="50%"/> <img src="screenshots/ball.png" width="50%"/>
-<img src="screenshots/sort.png" width="70%"/> 
+<table>
+  <tr>
+    <td><img src="screenshots/type.png" width=270 height=480></td>
+    <td><img src="screenshots/ball.png" width=270 height=480></td>
+    <td><img src="screenshots/sort.png" width=270 height=480></td>
+  </tr>
+ </table>
+
 ---
 
 This program, developed with Rehnuma Tabassum, was part of our capstone project 'Detecting IMAP
