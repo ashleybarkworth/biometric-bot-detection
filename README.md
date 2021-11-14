@@ -9,6 +9,8 @@ ___
   </tr>
  </table>
 
+<img src="screenshots/sort.png" width=792 height=559>
+
 ---
 
 This program, developed with Rehnuma Tabassum, was part of our capstone project 'Detecting IMAP
