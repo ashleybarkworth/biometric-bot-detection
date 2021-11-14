@@ -5,7 +5,7 @@ from util import bezier_curve
 
 region = (400, 200, 2200, 1600)
 
-img_folder = 'img/'
+img_folder = 'bot/img/'
 
 
 def find_center(location):
@@ -50,8 +50,10 @@ def click_image(location):
         bezier_curve.moveTo(x, y)
         # Time between press and release
         click_time = random.uniform(0.05, 0.1)
+        # Left mouse button press
         pyautogui.mouseDown()
         time.sleep(click_time)
+        # Left mouse button release
         pyautogui.mouseUp()
 
 
@@ -106,14 +108,16 @@ def type_words():
     text = '123CAPabc!'
     for i in range(times):
         for c in text:
-            # Random wait time between characters
+            # Random wait time between pressing and releasing characters
             seconds = random.uniform(0.03, 0.7)
+            # Key press
             pyautogui.keyDown(c)
             time.sleep(seconds)
+            # Key release
             pyautogui.keyUp(c)
         # Enter new line after all but last word
         if i < times - 1:
-            # Random wait time after finishing word
+            # Random wait time after finishing each word
             seconds = random.uniform(0.5, 3.0)
             time.sleep(seconds)
             pyautogui.press('enter')

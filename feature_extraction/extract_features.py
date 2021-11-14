@@ -4,8 +4,8 @@ import os
 
 from feature_extraction import mouse_features, key_features
 
-events_directory = '../data/events'
-features_directory = '../data/features/'
+events_directory = 'data/events'
+features_directory = 'data/features/'
 
 
 def create_feature_folder(folder):

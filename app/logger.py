@@ -9,7 +9,7 @@ from pynput import mouse
 from pynput import keyboard
 
 # Subdirectory folders to save mouse/keystroke data in
-data_folder = '../data/'
+data_folder = 'data/'
 key_folder = 'key/'
 mouse_folder = 'mouse/'
 events_folder = 'events/'

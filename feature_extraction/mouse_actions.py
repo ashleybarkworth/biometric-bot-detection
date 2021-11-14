@@ -175,7 +175,7 @@ class MouseAction:
         for i in range(1, len(path)):
             dp = path[i] - path[i - 1]
             if dp == 0:
-                continue
+                dp = DELTA
             dtheta = theta[i] - theta[i - 1]
             curv_i = dtheta / dp
             curvature.append(curv_i)

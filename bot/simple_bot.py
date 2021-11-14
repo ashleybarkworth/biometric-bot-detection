@@ -5,7 +5,7 @@ import pyautogui
 
 region = (400, 200, 2200, 1600)
 
-img_folder = 'img/'
+img_folder = 'bot/img/'
 
 
 def find_center(location):
@@ -100,7 +100,7 @@ def type_words():
 
 
 def complete_keyboard_activity():
-    # Start capturing keystroke training_data
+    # Start capturing keystroke data
     location = find_image('capture_btn.png', True)
     click_image(location)
     # Locate text box and type word

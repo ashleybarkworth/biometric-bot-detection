@@ -15,7 +15,7 @@ x_coord = 200
 y_coord = 100
 
 # Image folder containing objects for ball and sorting games
-img_folder = 'img/'
+img_folder = 'app/img/'
 
 # Either human, simple (Simple Bot), or advanced (Advanced Bot)
 user_type = None
