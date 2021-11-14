@@ -4,8 +4,8 @@ ___
 
 <table>
   <tr>
-    <td><img src="screenshots/type.png" width=540 height=540></td>
-    <td><img src="screenshots/ball.png" width=540 height=540></td>
+    <td><img src="screenshots/type.png" width=540 height=423></td>
+    <td><img src="screenshots/ball.png" width=540 height=423></td>
   </tr>
  </table>
 
