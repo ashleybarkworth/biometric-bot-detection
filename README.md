@@ -2,9 +2,9 @@
 
 ___
 
-|   |   |
-|---|---|
-![](demo/typing.gif) | ![](demo/sorting.gif)
+<img src="screenshots/type.png" width="50%"/> <img src="screenshots/ball.png" width="50%"/>
+<img src="screenshots/sort.png" width="70%"/> 
+---
 
 This program, developed with Rehnuma Tabassum, was part of our capstone project 'Detecting IMAP
 Credential Stuﬃng Bots Using Behavioural Biometrics' as part of our requirement for the Master of Applied 
@@ -21,6 +21,7 @@ a simple bot which makes no attempt to appear human, and an advanced bot that us
 We evaluated our system using the Random Forest (RF), Decision Tree (DT), Support Vector Machine (SVM), and K-Nearest Neighbors (KNN) 
 algorithms and compared them against two data sets: one containing human and simple bot data, and one containing human and advanced 
 bot data. We evaluated our system with 5-fold cross validation and achieved accuracies of roughly 96% for both data sets.
+
 
 ## Overview 
 
